@@ -1,0 +1,37 @@
+
+body {
+	line-height: 1;
+    font-family: "Open Sans", sans-serif;
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+	content: '';
+	content: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+a{
+    text-decoration: none;
+}
+
+#feed-main {
+    margin-top: 2%;
+}
+
+.col-2 {
+    background-color: lightblue;
+    
+}
+
+.col-8 {
+    background-color: lightcoral;
+}
