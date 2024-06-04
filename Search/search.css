@@ -1,0 +1,143 @@
+body {
+    line-height: 1;
+    font-family: "Open Sans", sans-serif;
+    background-color: F0F5F8;
+  }
+  ol,
+  ul {
+    list-style: none;
+  }
+  blockquote,
+  q {
+    quotes: none;
+  }
+  blockquote:before,
+  blockquote:after,
+  q:before,
+  q:after {
+    content: "";
+    content: none;
+  }
+  table {
+    border-collapse: collapse;
+    border-spacing: 0;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  #feed-main {
+    margin-top: 2%;
+  }
+
+  .col-2 {
+    background-color: lightblue;
+  }
+
+  .col-8 {
+    background-color: white;
+  }
+
+  .container-box {
+    background-color: white;
+    padding: 30px; 
+    padding-left: 70px;
+    padding-right: 70px;
+    border-radius: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
+    display: flex;
+  }
+
+  .content {
+    width: 70%;
+  }
+
+  .image-container {
+    width: 30%;
+    display: flex;
+    justify-content: flex-end; 
+  }
+  
+  .post {
+    display: flex;
+    align-items: center;
+  }
+
+  .user-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #ccc;
+  }
+
+  .post-content {
+    display: flex;
+    align-items: center;
+  }
+
+  .username {
+    font-size: 14px;
+    font-weight: bold;
+    margin-right: 5px; 
+    margin-left: 10px; 
+    margin-bottom: 0; 
+    line-height: 30px; 
+  }
+
+  .time {
+    font-size: 12px;
+    color: #666;
+    margin-left: 10px;
+    margin-bottom: 0; 
+    line-height: 30px; 
+  }
+
+  h1 {
+    font-size: 22px; 
+    font-weight: bold; 
+    color: #333; 
+    margin-top: 10px;
+  }
+
+  .post-actions {
+    margin-top: 20px;
+    display: flex;
+    align-items: center; 
+  }
+
+  .post-actions .button-container {
+    display: flex;
+    align-items: center;
+    margin-right: 5px;
+  }
+
+  .post-actions .button {
+    border-radius: 10px;
+    padding: 5px 10px;
+    background-color: transparent;
+    border: 1px solid #ccc;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .post-actions .button i {
+    margin-right: 5px;
+  }
+
+  .post-actions .button span {
+    margin-left: 5px;
+  }
+
+  .upvotes,
+  .comments {
+    margin-right: 10px; 
+  }
+
+  .square-image {
+    width: 120px;
+    height: 120px;
+    background-size: cover;
+    border-radius: 5px;
+  }
