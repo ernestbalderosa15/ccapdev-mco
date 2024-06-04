@@ -31,13 +31,6 @@ body {
     margin-top: 2%;
   }
 
-  .col-2 {
-    background-color: lightblue;
-  }
-
-  .col-8 {
-    background-color: white;
-  }
 
   .container-box {
     background-color: white;
@@ -148,4 +141,35 @@ body {
 
 a {
 	color: black;
+}
+
+.col-8 {
+	background-color: coral;
+}
+
+.card {
+	font-weight: 700;
+	border: none;
+}
+
+.primary-blue {
+	color: #304fb6
+}
+
+.primary-dark {
+	color: #161B8E;
+}
+
+.list-group-item{
+	border: none;
+}
+
+.list-group-item:hover{
+	border-left: solid;
+	border-color: #304fb6;
+	border-radius: 0 5px 5px 0;
+}
+
+h4 {
+	font-weight: bold;
 }
