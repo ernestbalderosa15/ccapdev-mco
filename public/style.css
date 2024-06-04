@@ -1,7 +1,7 @@
 body {
   line-height: 1;
   font-family: "Open Sans", sans-serif;
-  background-color: #e4e4e3cd;
+  background-color: #F0F5F8;
   color: #333;
   margin-bottom: 5%;
 }
@@ -34,7 +34,7 @@ a {
 }
 
 .container-box {
-  background-color: ghostwhite;
+  background-color: white;
   padding: 30px;
   padding-left: 70px;
   padding-right: 70px;
@@ -44,7 +44,7 @@ a {
 }
 
 .container-box-feed {
-  background-color: ghostwhite;
+  background-color: white;
   padding: 30px;
   padding-left: 70px;
   padding-right: 70px;
@@ -52,6 +52,17 @@ a {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   display: flex;
 }
+
+.container-box-top {
+  background-color: white;
+  padding: 30px;
+  padding-right: 70px;
+  border-radius: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+}
+
+
 
 .post-feed {
   display: flex;
@@ -152,7 +163,7 @@ h1 {
   width: 120px;
   height: 120px;
   background-size: cover;
-  border-radius: 5px;
+  border-radius: 20px;
 }
 
 .bi:hover {
@@ -196,22 +207,21 @@ h4 {
   max-height: 400px;
   object-fit: cover;
   margin-top: 10px;
-  border-radius: 8px;
+  border-radius: 20px;
 }
 
 #feed-main .container-box-feed form {
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  border-radius: 10px;
 }
 
 #feed-main .container-box-feed .form-control {
-  border-radius: 5px;
+  border-radius: 10px;
   resize: none;
 }
 
 #feed-main .container-box-feed .btn {
-  border-radius: 8px;
+  border-radius: 10px;
   background-color: #161b8e;
   border: none;
 }
@@ -269,7 +279,7 @@ a > .container-box-feed {
 
 a > container-box
 
-/* Additional styles for the comments section */
+
 .comments-section {
   border-top: 1px solid #dee2e6;
   padding-top: 1rem;
@@ -312,3 +322,86 @@ a > container-box
 	color: #6c757d;
 	margin-bottom: 0.5rem;
 }
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 10px;
+
+}
+
+.dropbtn {
+  background-color: #F0F5F8;
+  color: 6c757d;
+  padding: 15px 20px;
+  border: none;
+  cursor: pointer;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: white;
+  min-width: 160px;
+  z-index: 1;
+  border-radius: 10px;
+  border: 1px solid lightslategray; 
+
+}
+
+.dropdown-content a {
+  color: 333;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+.post-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.post-form label {
+  font-size: 18px;
+  color: #333;
+  margin-top: 10px;
+}
+
+.post-form textarea {
+  width: 100%;
+  resize: vertical;
+  padding: 5px;
+}
+
+.post-form-button {
+  background-color: #304fb6;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.post-form-button:hover {
+  background-color: #161b8e;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  text-decoration: none; 
+  color: black; 
+  margin-bottom: 20px;
+}
+
+.back-button i {
+  font-size: 1.2rem; /
+}
+
