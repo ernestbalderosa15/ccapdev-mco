@@ -1,7 +1,8 @@
 body {
     line-height: 1;
     font-family: "Open Sans", sans-serif;
-    background-color: F0F5F8;
+    background-color: #e4e4e3cd;
+	color: #333;
   }
   ol,
   ul {
@@ -191,26 +192,75 @@ h4 {
 .post-image {
 	width: 100%;
 	height: auto;
-	max-height: 400px; /* Adjust as needed */
-	object-fit: cover; /* Ensure the image covers the area while maintaining aspect ratio */
-	margin-top: 10px; /* Add some spacing */
-	border-radius: 8px; /* Rounded corners */
+	max-height: 400px; 
+	object-fit: cover; 
+	margin-top: 10px; 
+	border-radius: 8px; 
   }
 
 #feed-main .container-box-feed form {
-	background-color: #f8f9fa; /* Light grey background */
+	background-color: #f8f9fa;
 	border-radius: 8px;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
   }
   
   #feed-main .container-box-feed .form-control {
 	border-radius: 5px;
-	resize: none; /* Disable resizing */
+	resize: none; 
   }
   
   #feed-main .container-box-feed .btn {
 	border-radius: 8px;
-	background-color: #161B8E; /* Bootstrap primary color */
+	background-color: #161B8E; 
 	border: none;
   }
   
+
+  #feed-user-card{
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+  }
+
+
+  #feed-user-card > img {
+	margin-top: 8%;
+	max-width: 50%;
+  }
+
+  h5 {
+	padding-top: 8%;
+  }
+  
+  /*
+  .col-2 {
+	background: blue;
+  } */
+
+.row > i > p{
+	padding-top: 8%;
+	font-weight: 300;
+	color: black;
+  }
+
+  #my-tags {
+	margin-top: 8%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+  }
+
+  #my-tags > h6 {
+	margin-top: 8%;
+	font-weight: 600;
+  }
+
+  #my-tags > ul {
+	padding: 0;
+	font-weight: 400;
+  }
+
+  .tag-item {
+	margin-top: 15%;
+  }
+
