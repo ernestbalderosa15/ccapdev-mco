@@ -22,7 +22,6 @@
       href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
       rel="stylesheet"
     />
-
     <link rel="stylesheet" href="../public/style.css" />
   </head>
   <body>
@@ -48,12 +47,11 @@
                 class="form-control rounded"
                 placeholder="Search"
               />
-              <span class="input-group-text border-0 d-none d-lg-flex"
-                >
+              <span class="input-group-text border-0 d-none d-lg-flex">
                 <a href="search.html">
-                  <i class="bi bi-search"></i
-                ></span>
+                  <i class="bi bi-search"></i>
                 </a>
+              </span>
             </form>
           </div>
           <!-- Center elements -->
@@ -76,8 +74,7 @@
                   role="button"
                   aria-expanded="false"
                 >
-                  <i class="bi bi-bell-fill px-2"></i>
-                  Notifications
+                  <i class="bi bi-bell-fill px-2"></i>Notifications
                 </a>
               </div>
 
@@ -119,37 +116,45 @@
       <div class="row justify-content-between">
         <!-- Left column -->
         <div class="col-2">
-          <div class="card" style="width: 5rem;">
-            <div class="card" style="width: 12rem;">
-              <ul class="list-group  list-group-flush">
+          <div class="card" style="width: 5rem">
+            <div class="card" style="width: 12rem">
+              <ul class="list-group list-group-flush">
                 <li class="list-group-item py-4">
-                  <i class="bi bi-house-door pe-3 pt-1">
-                  </i>
-                  Home
+                  <i class="bi bi-house-door pe-3 pt-1"></i> Home
                 </li>
                 <li class="list-group-item py-4">
-                  <i class="bi bi-stars pe-3 pt-1">
-                  </i>
-                  My Interests
+                  <i class="bi bi-stars pe-3 pt-1"></i> My Interests
                 </li>
                 <li class="list-group-item py-4">
-                  <i class="bi bi-save-fill pe-3 pt-1">
-                  </i>
-                  Saved Items
+                  <i class="bi bi-save-fill pe-3 pt-1"></i> Saved Items
                 </li>
-
               </ul>
-
             </div>
-
           </div>
         </div>
         <div class="col-8">
+          <div class="container-box-feed mb-3">
+            <div class="content-feed">
+              <form id="create-post-form" class="d-flex">
+                <textarea
+                  class="form-control me-2"
+                  id="post-content"
+                  rows="1"
+                  placeholder="Make a post"
+                ></textarea>
+                <button type="submit" class="btn btn-primary">
+                  <i class="bi bi-plus-circle"></i>
+                  <!-- Placeholder for customizable icon -->
+                </button>
+              </form>
+            </div>
+          </div>
+
           <!-- Post -->
-          <div class="container-box">
-            <div class="content">
+          <div class="container-box-feed">
+            <div class="content-feed">
               <!-- Profile, Username, Time -->
-              <div class="post">
+              <div class="post-feed">
                 <div class="user-avatar"></div>
                 <div class="post-content">
                   <p class="username">Username</p>
@@ -158,6 +163,12 @@
               </div>
               <!-- Post Title -->
               <h1>Who was the first guy to land on the moon?</h1>
+              <!-- Post Image -->
+              <img
+                src="https://images.pexels.com/photos/47367/full-moon-moon-bright-sky-47367.jpeg?auto=compress&cs=tinysrgb&w=600"
+                alt="Post Image"
+                class="post-image"
+              />
               <!-- Post Buttons -->
               <div class="post-actions">
                 <div class="button-container">
@@ -193,8 +204,8 @@
 
           <!-- 2nd Post -->
           <div class="container-box mt-3">
-            <div class="content">
-              <div class="post">
+            <div class="content-feed">
+              <div class="post-feed">
                 <div class="user-avatar"></div>
                 <div class="post-content">
                   <p class="username">Another Username</p>
@@ -202,6 +213,11 @@
                 </div>
               </div>
               <h1>What is the best programming language?</h1>
+              <img
+                src="https://images.pexels.com/photos/5749818/pexels-photo-5749818.jpeg?auto=compress&cs=tinysrgb&w=600"
+                alt="Post Image"
+                class="post-image"
+              />
               <div class="post-actions">
                 <div class="button-container">
                   <div class="button hollow-button">
