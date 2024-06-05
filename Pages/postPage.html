@@ -186,8 +186,7 @@
               </div>
 
               <!-- Comments Section -->
-              <br>
-              <div class="comments-section">
+              <div class="comments-section mt-3">
                 <div class="comment">
                   <div class="comment-avatar">
                     <img
@@ -198,7 +197,29 @@
                   <div class="comment-body">
                     <div class="comment-username">
                       User1 <span class="comment-time"> | 30 minutes ago</span>
+                      <span class = "comment-dropdown">
+                          <div class = "dropdown">
+                          <button
+                            class="comment-dropdown-toggle float:right"
+                            id="comDropdownMenuLink"
+                            role="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                          >
+                          &#8942;
+                          </button>
+                          <ul
+                            class="dropdown-menu dropdown-menu-end"
+                            aria-labelledby="comDropdownMenuLink"
+                          >
+                            <li><a class="dropdown-item" href="#">Reply</a></li>
+                            <li><a class="dropdown-item" href="#">Save</a></li>
+                            <li><a class="dropdown-item" href="#">Share</a></li>
+                          </ul>
+                        </div>
+                      </span>
                     </div>
+                    
                     <div class="comment-text">
                       This is a mock comment. Great post!
                     </div>
@@ -214,6 +235,27 @@
                   <div class="comment-body">
                     <div class="comment-username">
                       User2 <span class="comment-time"> | 30 minutes ago</span>
+                      <span class = "comment-dropdown">
+                        <div class = "dropdown">
+                        <button
+                          class="comment-dropdown-toggle float:right"
+                          id="comDropdownMenuLink"
+                          role="button"
+                          data-bs-toggle="dropdown"
+                          aria-expanded="false"
+                        >
+                        &#8942;
+                        </button>
+                        <ul
+                          class="dropdown-menu dropdown-menu-end"
+                          aria-labelledby="comDropdownMenuLink"
+                        >
+                          <li><a class="dropdown-item" href="#">Reply</a></li>
+                          <li><a class="dropdown-item" href="#">Save</a></li>
+                          <li><a class="dropdown-item" href="#">Share</a></li>
+                        </ul>
+                      </div>
+                    </span>
                     </div>
                     <div class="comment-text">
                       I totally agree with the above statement.
@@ -230,6 +272,27 @@
                   <div class="comment-body">
                     <div class="comment-username">
                       User3 <span class="comment-time"> | 30 minutes ago</span>
+                      <span class = "comment-dropdown">
+                        <div class = "dropdown">
+                        <button
+                          class="comment-dropdown-toggle float:right"
+                          id="comDropdownMenuLink"
+                          role="button"
+                          data-bs-toggle="dropdown"
+                          aria-expanded="false"
+                        >
+                        &#8942;
+                        </button>
+                        <ul
+                          class="dropdown-menu dropdown-menu-end"
+                          aria-labelledby="comDropdownMenuLink"
+                        >
+                          <li><a class="dropdown-item" href="#">Reply</a></li>
+                          <li><a class="dropdown-item" href="#">Save</a></li>
+                          <li><a class="dropdown-item" href="#">Share</a></li>
+                        </ul>
+                      </div>
+                    </span>
                     </div>
                     <div class="comment-text">
                       Can someone provide more details?
@@ -246,24 +309,33 @@
                   <div class="comment-body">
                     <div class="comment-username">
                       User4 <span class="comment-time"> | 30 minutes ago</span>
+                      <span class = "comment-dropdown">
+                        <div class = "dropdown">
+                        <button
+                          class="comment-dropdown-toggle float:right"
+                          id="comDropdownMenuLink"
+                          role="button"
+                          data-bs-toggle="dropdown"
+                          aria-expanded="false"
+                        >
+                        &#8942;
+                        </button>
+                        <ul
+                          class="dropdown-menu dropdown-menu-end"
+                          aria-labelledby="comDropdownMenuLink"
+                        >
+                          <li><a class="dropdown-item" href="#">Reply</a></li>
+                          <li><a class="dropdown-item" href="#">Save</a></li>
+                          <li><a class="dropdown-item" href="#">Share</a></li>
+                        </ul>
+                      </div>
+                    </span>
                     </div>
                     <div class="comment-text">
                       Can someone provide more details?
                     </div>
                   </div>
                 </div>
-                <form class="d-flex input-group w-auto my-auto mb-3 mb-md-0">
-                  <input
-                    autocomplete="off"
-                    type="comment"
-                    class="form-control rounded"
-                    placeholder="Type your comment here"
-                  />
-                  <span class="input-group-text border-0 d-none d-lg-flex">
-                    <a href="comment.html">
-                      <i class="bi bi-plus-circle"></i>                    </a>
-                  </span>
-                </form>
               </div>
             </div>
           </div>

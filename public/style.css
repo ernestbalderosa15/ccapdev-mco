@@ -293,6 +293,7 @@ a > container-box
   width: 40px;
   height: 40px;
   border-radius: 50%;
+  margin-top: 0.5rem;
   margin-right: 1rem;
   background-color: #f0f0f0;
 }
@@ -321,6 +322,10 @@ a > container-box
 	font-size: 0.875rem;
 	color: #6c757d;
 	margin-bottom: 0.5rem;
+}
+
+.comment-dropdown {
+  float: right;
 }
 
 .dropdown {
