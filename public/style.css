@@ -328,6 +328,14 @@ a > container-box
   float: right;
 }
 
+.comment-dropdown button{
+  background-color: #f8f9fa;
+  color: #6c757d;
+  font-size: 150%;
+  border: none;
+  cursor: pointer;
+}
+
 .dropdown {
   position: relative;
   display: inline-block;
