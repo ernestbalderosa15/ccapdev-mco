@@ -5,6 +5,16 @@ body {
   color: #333;
   margin-bottom: 5%;
 }
+
+.post-body {
+  line-height: 1;
+  font-family: "Open Sans", sans-serif;
+  color: #333;
+  margin-bottom: 5%;
+  margin-top: 5%;
+  line-height: 150%;
+}
+
 ol,
 ul {
   list-style: none;
@@ -235,6 +245,7 @@ h4 {
 #feed-user-card > img {
   margin-top: 8%;
   max-width: 50%;
+  border-radius: 20%;
 }
 
 h5 {
@@ -283,11 +294,12 @@ a > container-box
 .comments-section {
   border-top: 1px solid #dee2e6;
   padding-top: 1rem;
-  margin-top: 1rem;
+  margin-top: 10%;
 }
 .comment {
   display: flex;
   margin-bottom: 1rem;
+  padding-top: 5px;
 }
 .comment-avatar {
   width: 40px;
@@ -322,6 +334,7 @@ a > container-box
 	font-size: 0.875rem;
 	color: #6c757d;
 	margin-bottom: 0.5rem;
+  line-height: 150%;
 }
 
 .comment-dropdown {
@@ -418,3 +431,150 @@ a > container-box
   font-size: 1.2rem; /
 }
 
+.form-container-box-feed {
+  background-color: white;
+  padding: 30px;
+  padding-left: 70px;
+  padding-right: 70px;
+  border-radius: 20px;
+  display: flex;
+}
+
+.form-content-feed {
+  width: 100%;
+}
+
+.form-back-button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  text-decoration: none; 
+  color: black; 
+  margin-bottom: 20px;
+}
+
+.form-back-button i {
+  font-size: 1.2rem;
+}
+
+.form-post-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-post-form label {
+  font-size: 18px;
+  color: #333;
+  margin-top: 10px;
+}
+
+.form-post-form textarea {
+  width: 100%;
+  resize: vertical;
+  padding: 5px;
+}
+
+.form-post-form-button {
+  background-color: #304fb6;
+  border: 1px solid #304fb6;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.form-post-form-button:hover {
+  background-color: #161b8e;
+}
+
+.ck-editor__editable {
+  min-height: 200px;
+}
+
+/* Tags */
+
+
+::selection{
+  color: #fff;
+  background: #5372F0;
+}
+.wrapper{
+  width: 100%;
+  border-radius: 10px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+.wrapper :where(.title, li, li i, .details){
+  display: flex;
+  align-items: center;
+}
+.title img{
+  max-width: 21px;
+}
+.title h2{
+  font-size: 21px;
+  font-weight: 600;
+  margin-left: 8px;
+}
+.wrapper .tags{
+  margin: 10px 0;
+  width: 100%;
+}
+.tags p{
+  font-size: 15px;
+}
+.tags ul{
+  display: flex;
+  flex-wrap: wrap;
+  padding: 7px;
+  margin: 12px 0;
+  border-radius: 5px;
+  border: 1px solid #a6a6a6;
+}
+.tags ul  li{
+  color: #333;
+  margin: 4px 3px;
+  list-style: none;
+  border-radius: 5px;
+  background: #F2F2F2;
+  padding: 5px 8px 5px 10px;
+  border: 1px solid #e3e1e1;
+}
+.tags ul li i{
+  height: 20px;
+  width: 20px;
+  color: #808080;
+  margin-left: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 50%;
+  background: #dfdfdf;
+  justify-content: center;
+}
+.tags ul input{
+  flex: 1;
+  padding: 5px;
+  border: none;
+  outline: none;
+  font-size: 16px;
+}
+.wrapper .details{
+  justify-content: space-between;
+}
+.details button{
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 9px 15px;
+  border-radius: 5px;
+  background: gray;
+  transition: background 0.3s ease;
+}
+.details button:hover{
+  background: lightgray;
+}

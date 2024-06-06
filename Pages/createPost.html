@@ -23,6 +23,9 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="../public/style.css" />
+
+    <script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
+
   </head>
   <body>
     <div class="p-3 text-center bg-white border-bottom">
@@ -89,7 +92,7 @@
                   aria-expanded="false"
                 >
                   <img
-                    src="https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG.png"
+                    src="https://i.pravatar.cc/150?img=54"
                     class="rounded-circle"
                     height="22"
                     alt=""
@@ -120,47 +123,72 @@
             <div class="card" style="width: 12rem">
               <ul class="list-group list-group-flush">
                 <li class="list-group-item py-4">
-                  <a href="feed.html">
                   <i class="bi bi-house-door pe-3 pt-1"></i> Home
-                  </a>  
                 </li>
                 <li class="list-group-item py-4">
                   <i class="bi bi-stars pe-3 pt-1"></i> My Interests
                 </li>
                 <li class="list-group-item py-4">
-                  <a href="savedpage.html">
-                    <i class="bi bi-save-fill pe-3 pt-1"></i> Saved Items
-                    </a>
+                  <i class="bi bi-save-fill pe-3 pt-1"></i> Saved Items
                 </li>
               </ul>
             </div>
           </div>
         </div>
         <div class="col-8">
-            <div class="container-box-feed mb-3">
-                <div class="content-feed">
-                    <a href="feed.html" class="back-button">
-                        <i class="bi bi-arrow-left"></i> Back
-                      </a>
+          <div class="form-container-box-feed mb-3">
+              <div class="form-content-feed">
+                <!-- Back Button -->
+                  <a href="feed.html" class="form-back-button">
+                      <i class="bi bi-arrow-left"></i> Back
+                  </a>
+
+                  <!-- Create Post Form -->
+                  <h1>Create a Post</h1>
+                  <form id="post-form" class="form-post-form" method="post">
+                    <!-- Title -->
+                      <label for="post-title">Title:</label>
+                      <input type="text" id="post-title" name="title" required>
                       
-            <h1>Create a Post</h1>
-            <form id="post-form" class="post-form" method="post">
-              <label for="post-title">Title:</label>
-              <input type="text" id="post-title" name="title" required>
-            
-              <label for="post-body">Body:</label>
-              <textarea id="post-body" name="body" rows="10" required></textarea>
-            
-              <button type="submit" class="post-form-button">Submit Post</button>
-            </form>        
-            </div>
-            </div>    
-        </div>
+                      
+                      <!-- Body -->
+                      <label for="post-body">Body:</label>
+                        <!-- Rich text editor-->
+                        <div id="editor"></div>
+                        <script>
+                                ClassicEditor
+                                        .create( document.querySelector( '#editor' ) )
+                                        .then( editor => {
+                                                console.log( editor );
+                                        } )
+                                        .catch( error => {
+                                                console.error( error );
+                                        } );
+                        </script>
+                                     
+                  </form>       
+                  <div class="wrapper">
+                    <i class="bi bi-tags-fill px-2"></i>Tags
+                    <div class="tags">
+                      <p>Press enter or add a comma after each tag</p>
+                      <ul><input type="text" spellcheck="false"></ul>
+                    </div>
+                    <div class="details">
+                      <p><span>10</span> tags are remaining</p>
+                      <button>Remove All</button>
+                    </div>
+                  </div>
+                  <button type="button" class="form-post-form-button" onclick="window.location.href='feed1.html'">Submit Post</button>
+
+                  
+              </div>
+          </div>    
+      </div>
 
         <div class="col-2">
           <div class="card" id="feed-user-card" style="width: 12rem; border-radius: 20px;">
             <img
-              src="https://cdn-icons-png.freepik.com/512/219/219986.png"
+              src="https://i.pravatar.cc/150?img=54"
               alt="Profile Picture"
               class="card-img-top"
             />
@@ -189,5 +217,7 @@
       integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
       crossorigin="anonymous"
     ></script>
+    <script src="../public/script.js"></script>
+
   </body>
 </html>
