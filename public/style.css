@@ -664,3 +664,19 @@ margin-top: -25px;
 
 .login-info input[type="submit"]:hover {
   background-color: #161b8e;
+}
+ 
+
+  .post-tag {
+    background-color: ghostwhite; 
+    border-color: ghostwhite;
+    color: gray;
+    padding: 5px;
+    text-align: center;
+    display: inline-block;
+    font-size: 14px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 12%;
+
+  }
