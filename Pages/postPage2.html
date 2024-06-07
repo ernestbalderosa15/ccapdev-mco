@@ -23,9 +23,6 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="../public/style.css" />
-
-    <script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
-
   </head>
   <body>
     <div class="p-3 text-center bg-white border-bottom">
@@ -123,70 +120,124 @@
             <div class="card" style="width: 12rem">
               <ul class="list-group list-group-flush">
                 <li class="list-group-item py-4">
+                  <a href="feed.html">
                   <i class="bi bi-house-door pe-3 pt-1"></i> Home
+                  </a>  
                 </li>
                 <li class="list-group-item py-4">
                   <i class="bi bi-stars pe-3 pt-1"></i> My Interests
                 </li>
                 <li class="list-group-item py-4">
-                  <i class="bi bi-save-fill pe-3 pt-1"></i> Saved Items
+                  <a href="savedpage.html">
+                    <i class="bi bi-save-fill pe-3 pt-1"></i> Saved Items
+                    </a>
                 </li>
               </ul>
             </div>
           </div>
         </div>
         <div class="col-8">
-          <div class="form-container-box-feed mb-3">
-              <div class="form-content-feed">
-                <!-- Back Button -->
-                  <a href="feed.html" class="form-back-button">
-                      <i class="bi bi-arrow-left"></i> Back
-                  </a>
-
-                  <!-- Create Post Form -->
-                  <h1>Create a Post</h1>
-                  <form id="post-form" class="form-post-form" method="post">
-                    <!-- Title -->
-                      <label for="post-title">Title:</label>
-                      <input type="text" id="post-title" name="title" required>
-                      
-                      
-                      <!-- Body -->
-                      <label for="post-body">Body:</label>
-                        <!-- Rich text editor-->
-                        <div id="editor"></div>
-                        <script>
-                                ClassicEditor
-                                        .create( document.querySelector( '#editor' ) )
-                                        .then( editor => {
-                                                console.log( editor );
-                                        } )
-                                        .catch( error => {
-                                                console.error( error );
-                                        } );
-                        </script>
-                                     
-                  </form>       
-                  <div class="wrapper">
-                    <i class="bi bi-tags-fill px-2"></i>Tags
-                    <div class="tags">
-                      <p>Press enter or add a comma after each tag</p>
-                      <ul><input type="text" spellcheck="false"></ul>
-                    </div>
-                    <div class="details">
-                      <p><span>10</span> tags are remaining</p>
-                      <button>Remove All</button>
-                    </div>
-                  </div>
-                  <button type="button" class="form-post-form-button" onclick="window.location.href='feed1.html'">Submit Post</button>
-
-                  
+            
+          <!-- Post -->
+          <div class="container-box-feed">
+            
+            <div class="content-feed">
+                                <!-- Back Button -->
+                                <a href="feed.html" class="form-back-button">
+                                    <i class="bi bi-arrow-left"></i> Back
+                                </a>
+            
+              <!-- Profile, Username, Time -->
+              <div class="post-feed">
+                <div class="user-avatar">
+                  <img
+                    src="https://i.pravatar.cc/150?img=54"
+                    alt="avatar"
+                    class="user-avatar"
+                    />
+                </div>
+                <div class="post-content">
+                  <p class="username">@RobertKilla</p>
+                  <p class="time">Just now</p>
+                </div>
               </div>
-          </div>    
-      </div>
+              <!-- Post Title -->
+              <h1>Help! Need Tips for Starting a Balcony Garden</h1>
 
-        <div class="col-2">
+              <div class="post-body">
+                Hi everyone,
+                <br><br>
+                I'm a complete beginner when it comes to gardening, but I'm excited to try growing some herbs and vegetables on my apartment balcony!  I know there's limited space, but I'm hoping to create a little urban oasis.
+                <br><br>
+                Does anyone have any tips for someone just starting out with a balcony garden?
+                <br><br>
+                What are some easy-to-grow vegetables and herbs for beginners?
+                Any recommendations for good quality pots and soil for container gardening?
+                How much sunlight do most vegetables and herbs need each day?
+                <br><br>
+                Any advice would be greatly appreciated!  Thanks in advance!
+              </body>
+              </div>
+              <!-- Post Image -->
+
+              <img
+              src="https://www.thespruce.com/thmb/gF9yLFJBtskM1A1elZ20ZI8U-bU=/4285x0/filters:no_upscale():max_bytes(150000):strip_icc()/tips-for-starting-a-balcony-garden-847801-hero-f51f8bf03e1949ea95d429c842b6837c.jpg"
+              alt="Post Image"
+                class="post-image"
+              />
+
+
+              <!-- Post Buttons -->
+              <div class="post-actions">
+                <div class="button-container">
+                  <div class="button hollow-button">
+                    <i class="bi bi-arrow-up"></i>
+                    <span class="upvotes">0</span>
+                  </div>
+                </div>
+                <div class="button-container">
+                  <div class="button hollow-button">
+                    <i class="bi bi-arrow-down"></i>
+                  </div>
+                </div>
+                <div class="button-container">
+                  <div class="button">
+                    <i class="bi bi-chat-dots"></i>
+                    <span class="comments">0</span>
+                  </div>
+                </div>
+                <div class="button-container">
+                  <div class="button">
+                    <i class="bi bi-bookmark"></i>
+                  </div>
+                </div>
+                <div class="button-container">
+                  <div class="button">
+                    <i class="bi bi-share"></i>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Comments Section -->
+              <br>
+              <br>
+              <form class="d-flex input-group w-auto my-auto mb-3 mb-md-0">
+                <input
+                  autocomplete="off"
+                  type="Comment"
+                  class="form-control rounded"
+                  placeholder="Comment"
+                />
+                <span class="input-group-text border-0 d-none d-lg-flex">
+                  <a href="postpage3.html">
+                    <i class="bi bi-plus-circle"></i>
+                  </a>
+                </span>
+              </form>
+            </div>
+          </div>
         </div>
+        <div class="col-2"></div>
       </div>
     </div>
 
@@ -195,7 +246,5 @@
       integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
       crossorigin="anonymous"
     ></script>
-    <script src="../public/script.js"></script>
-
   </body>
 </html>

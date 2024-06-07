@@ -248,8 +248,9 @@ h4 {
   border-radius: 20%;
 }
 
-h5 {
-  padding-top: 8%;
+.row h5 {
+  font-weight: 600;
+  margin-top: 8%;
 }
 
 /*
@@ -258,10 +259,20 @@ h5 {
   } */
 
 .row > i > p {
-  padding-top: 8%;
-  font-weight: 300;
+  align-items: center;
+  font-weight: 250;
   color: black;
+  padding: 10%;
+  line-height: 20px;
 }
+
+.row body {
+  align-items: center;
+  color: black;
+  padding: 10%;
+  line-height: 20px;
+}
+
 
 #my-tags {
   margin-top: 8%;
@@ -348,6 +359,31 @@ a > container-box
   border: none;
   cursor: pointer;
 }
+
+.post-dropdown {
+  float: right;
+margin-top: -25px;
+}
+
+.post-dropdown button {
+  color: #6c757d;
+  font-size: 150%;
+  border: none;
+  cursor: pointer;
+  background: none;  /* Remove background */
+}
+
+.p-dropdown {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 10px;
+}
+
+
+.dropdown-item {
+  background-color: transparent !important;  /* Override Bootstrap background */
+}
+
 
 .dropdown {
   position: relative;
@@ -578,3 +614,4 @@ a > container-box
 .details button:hover{
   background: lightgray;
 }
+
