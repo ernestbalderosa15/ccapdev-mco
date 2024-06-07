@@ -105,3 +105,8 @@ removeBtn.addEventListener("click", () =>{
     ul.querySelectorAll("li").forEach(li => li.remove());
     countTags();
 });
+
+var loadFile = function (event) {
+    var image = document.getElementById("output");
+    image.src = URL.createObjectURL(event.target.files[0]);
+  };
