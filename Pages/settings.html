@@ -164,6 +164,17 @@
 
                 <!-- Create Post Form -->
                 <h1>Edit profile details</h1>
+                
+                <!--Edit profile picture-->
+                <div class="profile-pic">
+                  <label class="-label" for="file">
+                    <span class="glyphicon glyphicon-camera"></span>
+                    <span>Change Profile Picture:</span>
+                  </label>
+                  <input id="file" type="file" onchange="loadFile(event)"/>
+                </div>
+                <!--Edit profile picture-->
+
                 <form id="post-form" class="form-post-form" method="post">
                   <!-- Title -->
                   <label for="post-title">Edit username:</label>
