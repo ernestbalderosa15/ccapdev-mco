@@ -36,9 +36,9 @@
           <div class="post-actions">
             <div class="button-container">
               <button class="hollow-button upvote-btn" data-post-id="{{_id}}">
-                <i class="bi bi-arrow-up"></i>
-                <span class="upvotes">{{postUp}}</span>
-              </button>
+          <i class="bi bi-arrow-up"></i>
+          <span class="upvotes">{{postUp}}</span>
+        </button>
             </div>
             <div class="button-container">
               <button class="hollow-button downvote-btn" data-post-id="{{_id}}">
@@ -84,9 +84,14 @@
     const postId = $(this).data("post-id");
     $.post("/upvote", { postId: postId }, function (data) {
       if (data.success) {
-        const upvoteSpan = $(`.upvote-btn[data-post-id='${postId}'] .upvotes`);
-        upvoteSpan.text(data.postUp);
+        // Update the upvote count for the clicked post only
+        $(`.upvote-btn[data-post-id='${postId}'] .upvotes`).text(data.postUp);
+      } else {
+        console.error("Failed to upvote post:", data.message);
       }
+    }).fail(function () {
+      console.error("Error occurred while making the upvote request");
     });
   });
 </script>
+
