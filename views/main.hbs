@@ -1,96 +1,92 @@
 {{> header_nav}}
 
 <div class="container" id="feed-main">
-      <div class="row justify-content-between">
-        <!-- Left column -->
-        {{> sidenav}}
-        <!-- Create post -->
-        <div class="col-8">
-          <div class="container-box-feed mb-3">
-            <div class="button-container ">
-              <a href="createpost.html" class="btn create-post-button" style="background-color: #304fb6; color: white; ">
-                <i class="bi bi-plus-circle"></i> Create Post
-              </a>
-            </div> 
-          </div>
-        
-        
-<!-- 1st Post -->
-            <div class="container-box-feed">
-
-            {{#each post_data}}
-              <div class="content-feed">
-                <!-- Profile, Username, Time -->
-                <div class="post-feed">
-                  <div class="user-avatar">
-                    <img
-                      src="{{authorImg}}"
-                      alt="avatar"
-                      class="user-avatar"
-                      />
-                  </div>
-                  <div class="post-content">
-                    <p class="username">{{author}}</p><!--author-->
-                    <p class="time">Posted {{postDate}}</p><!--date-->
-                  </div>
-                </div>
-                <!-- Post Title -->
-                <h1>{{postTitle}}</h1><!--title-->
-                <!-- Post Image -->
-                <img
-                  src="{{postImg}}"
-                  alt="Post Image"
-                  class="post-image"
-                />
-
-                <body> Tags </body><!--tags-->
-                <span class="w3-tag w3-padding w3-round-large w3-red w3-center">
-                  #{{postTags}}
-                  </span>
-                  
-                <!-- Post Buttons -->
-                <div class="post-actions">
-                  <div class="button-container">
-                    <div class="button hollow-button">
-                      <i class="bi bi-arrow-up"></i>
-                      <span class="upvotes">{{postUp}} - {{postDown}}</span><!--FIX-->
-                    </div>
-                  </div>
-                  <div class="button-container">
-                    <div class="button hollow-button">
-                      <i class="bi bi-arrow-down"></i>
-                    </div>
-                  </div>
-                  <div class="button-container">
-                    <a href="postPage.html">
-                      <div class="button">
-                        <i class="bi bi-chat-dots"></i>
-                        <span class="comments">{{postComCnt}}</span><!--comments-->
-                      </div>
-                    </a>
-                  </div>
-                  <div class="button-container">
-                    <div class="button">
-                        {{#if postSaved}}
-                        <i class="bi bi-bookmark-fill"></i>
-                        {{else}}
-                      <i class="bi bi-bookmark"></i>
-                        {{/if}}
-                    </div>
-                  </div>
-                  <div class="button-container">
-                    <div class="button">
-                      <i class="bi bi-share"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              {{/each}}
-            </div> 
-                    
-                 
+  <div class="row justify-content-between">
+    <!-- Left column -->
+    {{> sidenav}}
+    <!-- Create post -->
+    <div class="col-8">
+      <div class="container-box-feed mb-3">
+        <div class="button-container ">
+          <a href="../Pages/createpost.html" class="btn create-post-button" style="background-color: #304fb6; color: white;">
+            <i class="bi bi-plus-circle"></i> Create Post
+          </a>
         </div>
-
-        {{> sidebar1}}
       </div>
+
+      <!-- Posts -->
+      {{#each post_data}}
+      <div class="container-box-feed">
+        <div class="content-feed">
+          <div class="post-feed">
+            <div class="user-avatar">
+              <img src="{{authorImg}}" alt="avatar" class="user-avatar" />
+            </div>
+            <div class="post-content">
+              <p class="username">{{author}}</p>
+              <p class="time">Posted {{postDate}}</p>
+            </div>
+          </div>
+          <h1>{{postTitle}}</h1>
+          <img src="{{postImg}}" alt="Post Image" class="post-image" />
+          <body>Tags</body>
+          <span class="w3-tag w3-padding w3-round-large w3-red w3-center">
+            #{{postTags}}
+          </span>
+          <div class="post-actions">
+            <div class="button-container">
+              <button class="hollow-button upvote-btn" data-post-id="{{_id}}">
+                <i class="bi bi-arrow-up"></i>
+                <span class="upvotes">{{postUp}}</span>
+              </button>
+            </div>
+            <div class="button-container">
+              <button class="hollow-button downvote-btn" data-post-id="{{_id}}">
+                <i class="bi bi-arrow-down"></i>
+                <span class="downvotes">{{postDown}}</span>
+              </button>
+            </div>
+            <div class="button-container">
+              <a href="postPage.html">
+                <div class="button">
+                  <i class="bi bi-chat-dots"></i>
+                  <span class="comments">{{postComCnt}}</span>
+                </div>
+              </a>
+            </div>
+            <div class="button-container">
+              <div class="button">
+                {{#if postSaved}}
+                <i class="bi bi-bookmark-fill"></i>
+                {{else}}
+                <i class="bi bi-bookmark"></i>
+                {{/if}}
+              </div>
+            </div>
+            <div class="button-container">
+              <div class="button">
+                <i class="bi bi-share"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {{/each}}
+
     </div>
+      {{> sidebar1}}
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).on("click", ".upvote-btn", function () {
+    const postId = $(this).data("post-id");
+    $.post("/upvote", { postId: postId }, function (data) {
+      if (data.success) {
+        const upvoteSpan = $(`.upvote-btn[data-post-id='${postId}'] .upvotes`);
+        upvoteSpan.text(data.postUp);
+      }
+    });
+  });
+</script>

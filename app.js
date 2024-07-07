@@ -1,72 +1,78 @@
-//Install Command:
-//npm init -y
-//npm i express express-handlebars body-parser mongoose
-
-const express = require('express');
+const express = require("express");
+const mongoose = require("mongoose");
 const server = express();
 
-const bodyParser = require('body-parser')
-server.use(express.json()); 
+const bodyParser = require("body-parser");
+server.use(express.json());
 server.use(express.urlencoded({ extended: true }));
 
-const handlebars = require('express-handlebars');
-server.set('view engine', 'hbs');
-server.engine('hbs', handlebars.engine({
-    //defaultLayout: 'index',//added check later
-    extname: 'hbs'
-}));
+const handlebars = require("express-handlebars");
+server.set("view engine", "hbs");
+server.engine(
+  "hbs",
+  handlebars.engine({
+    extname: "hbs",
+  })
+);
 
-server.use(express.static('public'));
+mongoose.connect(
+  "mmongodb+srv://atlas-sample-dataset-load-668a80f4d7654d0a1c1b4e3e:<password>@cluster0.hhgoid5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  }
+);
 
-const mongoose = require('mongoose');
-mongoose.connect('mongodb://127.0.0.1:27017/forum');
+server.use(express.static("public"));
 
-const postSchema = new mongoose.Schema({
-    authorImg: { type: String },
-    author: { type: String },
-    postDate: { type: Date },
-    postTitle: { type: String },
-    postImg: { type: String },
-    postTags: { type: Array },
-    postUp: { type: Number },
-    postDown: { type: Number },
-    postComCnt: { type: Number },//comments
-    postSaved: { type: Boolean }
-},{ versionKey: false });
-  
-const postModel = mongoose.model('post', postSchema);
+let posts = [
+  {
+    _id: "6689e7888d99ea9e4463fd07",
+    authorImg: "https://i.pravatar.cc/150?img=54",
+    author: "@RobertKilla",
+    postDate: "2018-04-15T16:54:40.000Z",
+    postTitle: "Help! Need Tips for Starting a Balcony Garden",
+    postImg:
+      "https://www.thespruce.com/thmb/gF9yLFJBtskM1A1elZ20ZI8U-bU=/4285x0/filters:no_upscale():max_bytes(150000):strip_icc()/tips-for-starting-a-balcony-garden-847801-hero-f51f8bf03e1949ea95d429c842b6837c.jpg",
+    postTags: ["gardening"],
+    postUp: 4,
+    postDown: 0,
+    postComCnt: 0,
+    postSaved: true,
+    usersUpvoted: ["@RobertKilla"],
+  },
+  {
+    _id: "6689e7888d99ea9e4463fd08",
+    authorImg: "https://i.pravatar.cc/150?img=54",
+    author: "@JaneDoe",
+    postDate: "2018-04-15T16:54:40.000Z",
+    postTitle: "Best Programming Practices",
+    postImg:
+      "https://www.thespruce.com/thmb/gF9yLFJBtskM1A1elZ20ZI8U-bU=/4285x0/filters:no_upscale():max_bytes(150000):strip_icc()/tips-for-starting-a-balcony-garden-847801-hero-f51f8bf03e1949ea95d429c842b6837c.jpg",
+    postTags: ["programming"],
+    postUp: 4,
+    postDown: 0,
+    postComCnt: 0,
+    postSaved: true,
+  },
+];
 
-//console.log(post1);
-
-//const userSchema = new mongoose.Schema({
-    
-//},{ versionKey: false });
-  
-//const userModel = mongoose.model('post', userSchema);
-
-server.get('/', async function(req, resp){
-    let post_data = await postModel.find({}).lean();
-    resp.render('main',{
-        layout: 'index',
-        title: 'The Forum',
-        post_data: post_data
-    });
+server.get("/", (req, res) => {
+  res.render("main", { layout: "index", post_data: posts });
 });
 
+server.post("/upvote", (req, res) => {
+  const postId = req.body.postId;
+  const post = posts.find((p) => p._id === postId);
+  if (post) {
+    post.postUp += 1;
+    res.json({ success: true, postUp: post.postUp });
+  } else {
+    res.status(404).json({ success: false, message: "Post not found" });
+  }
+});
 
-
-//Only at the very end should the database be closed.
-function finalClose(){
-    console.log('Close connection at the end!');
-    mongoose.connection.close();
-    process.exit();
-}
-
-process.on('SIGTERM',finalClose);  //general termination signal
-process.on('SIGINT',finalClose);   //catches when ctrl + c is used
-process.on('SIGQUIT', finalClose); //catches other termination commands
-
-const port = process.env.PORT | 9090;
-server.listen(port, function(){
-    console.log('Listening at port '+port);
+const port = process.env.PORT || 9090;
+server.listen(port, function () {
+  console.log("Listening at port " + port);
 });
