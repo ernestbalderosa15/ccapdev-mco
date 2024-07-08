@@ -29,10 +29,10 @@
     </div>
     <h1>{{postTitle}}</h1>
     <img src="{{postImg}}" alt="Post Image" class="post-image" />
-    <body>Tags</body>
-    <span class="w3-tag w3-padding w3-round-large w3-red w3-center">
-      #{{postTags}}
-    </span>
+    <br/>
+      {{#each postTags}}
+            <button class="post-tag">{{this}}</button>
+          {{/each}}
     <div class="post-actions">
       <div class="button-container">
         <button class="hollow-button upvote-btn" data-post-id={{_id}}>
