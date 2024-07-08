@@ -25,7 +25,6 @@
     <link rel="stylesheet" href="../public/style.css" />
 
     <script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
-
   </head>
   <body>
     <div class="p-3 text-center bg-white border-bottom">
@@ -35,7 +34,7 @@
           <div
             class="col-md-4 d-flex justify-content-center justify-content-md-start mb-3 mb-md-0"
           >
-            <a href="feed.html" class="ms-md-2 pt-1">
+            <a href="/" class="ms-md-2 pt-1">
               <h4>The Forum</h4>
             </a>
           </div>
@@ -103,9 +102,15 @@
                   class="dropdown-menu dropdown-menu-end"
                   aria-labelledby="navbarDropdownMenuLink"
                 >
-                <li><a class="dropdown-item" href="profilepage.html">My profile</a></li>
-                <li><a class="dropdown-item" href="settings.html">Settings</a></li>
-                <li><a class="dropdown-item" href="login.html">Logout</a></li>
+                  <li>
+                    <a class="dropdown-item" href="profilepage.html"
+                      >My profile</a
+                    >
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="settings.html">Settings</a>
+                  </li>
+                  <li><a class="dropdown-item" href="login.html">Logout</a></li>
                 </ul>
               </div>
             </div>
@@ -137,56 +142,58 @@
         </div>
         <div class="col-8">
           <div class="form-container-box-feed mb-3">
-              <div class="form-content-feed">
-                <!-- Back Button -->
-                  <a href="feed.html" class="form-back-button">
-                      <i class="bi bi-arrow-left"></i> Back
-                  </a>
+            <div class="form-content-feed">
+              <!-- Back Button -->
+              <a href="./" class="form-back-button">
+                <i class="bi bi-arrow-left"></i> Back
+              </a>
 
-                  <!-- Create Post Form -->
-                  <h1>Create a Post</h1>
-                  <form id="post-form" class="form-post-form" method="post">
-                    <!-- Title -->
-                      <label for="post-title">Title:</label>
-                      <input type="text" id="post-title" name="title" required>
-                      
-                      
-                      <!-- Body -->
-                      <label for="post-body">Body:</label>
-                        <!-- Rich text editor-->
-                        <div id="editor"></div>
-                        <script>
-                                ClassicEditor
-                                        .create( document.querySelector( '#editor' ) )
-                                        .then( editor => {
-                                                console.log( editor );
-                                        } )
-                                        .catch( error => {
-                                                console.error( error );
-                                        } );
-                        </script>
-                                     
-                  </form>       
-                  <div class="wrapper">
-                    <i class="bi bi-tags-fill px-2"></i>Tags
-                    <div class="tags">
-                      <p>Press enter or add a comma after each tag</p>
-                      <ul><input type="text" spellcheck="false"></ul>
-                    </div>
-                    <div class="details">
-                      <p><span>10</span> tags are remaining</p>
-                      <button>Remove All</button>
-                    </div>
-                  </div>
-                  <button type="button" class="form-post-form-button" onclick="window.location.href='feed1.html'">Submit Post</button>
+              <!-- Create Post Form -->
+              <h1>Create a Post</h1>
+              <form id="post-form" class="form-post-form" method="post">
+                <!-- Title -->
+                <label for="post-title">Title:</label>
+                <input type="text" id="post-title" name="title" required />
 
-                  
+                <!-- Body -->
+                <label for="post-body">Body:</label>
+                <!-- Rich text editor-->
+                <div id="editor"></div>
+                <script>
+                  ClassicEditor.create(document.querySelector("#editor"))
+                    .then((editor) => {
+                      console.log(editor);
+                    })
+                    .catch((error) => {
+                      console.error(error);
+                    });
+                </script>
+              </form>
+              <div class="wrapper">
+                <i class="bi bi-tags-fill px-2"></i>Tags
+                <div class="tags">
+                  <p>Press enter or add a comma after each tag</p>
+                  <ul>
+                    <input type="text" spellcheck="false" />
+                  </ul>
+                </div>
+                <div class="details">
+                  <p><span>10</span> tags are remaining</p>
+                  <button>Remove All</button>
+                </div>
               </div>
-          </div>    
-      </div>
-
-        <div class="col-2">
+              <button
+                type="button"
+                class="form-post-form-button"
+                onclick="window.location.href='feed1.html'"
+              >
+                Submit Post
+              </button>
+            </div>
+          </div>
         </div>
+
+        <div class="col-2"></div>
       </div>
     </div>
 
@@ -196,6 +203,5 @@
       crossorigin="anonymous"
     ></script>
     <script src="../public/script.js"></script>
-
   </body>
 </html>

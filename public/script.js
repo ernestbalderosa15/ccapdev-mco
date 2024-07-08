@@ -8,6 +8,16 @@ tags = ["coding", "nepal"];
 countTags();
 createTag();
 
+document.addEventListener("DOMContentLoaded", function () {
+    ClassicEditor.create(document.querySelector("#editor"))
+        .then((editor) => {
+            console.log(editor);
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+});
+
 function countTags(){
     input.focus();
     tagNumb.innerText = maxTags - tags.length;
@@ -110,3 +120,5 @@ var loadFile = function (event) {
     var image = document.getElementById("output");
     image.src = URL.createObjectURL(event.target.files[0]);
   };
+
+

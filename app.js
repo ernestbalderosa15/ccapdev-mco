@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const { MongoClient, ObjectId } = require("mongodb");
 const server = express();
+const path = require("path");
 
 const bodyParser = require("body-parser");
 server.use(express.json());
@@ -42,8 +43,11 @@ async function connectToDatabase() {
   }
 }
 
-server.use(express.static("public"));
+//server.use(express.static("public"));
+server.use(express.static(path.join(__dirname, 'public')));
+server.use(express.static(path.join(__dirname, 'Pages')));
 
+//SCHEMAS
 const postSchema = new Schema({
   _id: String,
   authorImg: String,
@@ -61,6 +65,24 @@ const postSchema = new Schema({
 
 const Post = mongoose.model("Post", postSchema);
 
+
+const userSchema = new Schema({
+  _id: String,
+  userImg: String,
+  username: String,
+  name: String,
+  password: String, //[TO FIX - need to add more logic here to hash the password]
+  userPosts: Array, //ARRAY OF POSTS
+  userComments: Array, //ARRAY OF COMMENTS
+  userTags: Array, //ARRAY OF STRINGS
+  savedPosts: Array, //ARRAY OF POSTS
+  friendList: Array //ARRAY OF USERS
+})
+
+const User = mongoose.model("User", userSchema);
+
+//FUNCTIONS for feed posts.
+
 server.get("/", async (req, res) => {
   try {
     const posts = await postColl.find().toArray();
@@ -71,10 +93,10 @@ server.get("/", async (req, res) => {
   }
 });
 
-//create an upvote feature according to the main.hbs
+//create an upvote feature according to the main.hbs [TO FIX]
 server.post("/upvote", async (req, res) => {
   const postId = req.body.postId;
-  const userId = "user1"; // Example user ID, replace with actual user ID logic
+  const userId = "user1"; // Example user ID, replace with actual user ID logic [TO FIX]
   
   try {
     const post = await postColl.findOne({ _id: postId });
@@ -132,8 +154,6 @@ server.get("/post/:id", async (req, res) => {
 });
 
 
-
-
 //For internal purposes only [REMOVE]
 server.get("/show-posts", async (req, res) => {
   try {
@@ -151,3 +171,30 @@ server.get("/show-posts", async (req, res) => {
 });
 
 connectToDatabase().catch(console.dir);
+
+
+//LOGIN ROUTE
+server.get("/login", (req,res) => {
+  res.render("login", {layout: false});
+});
+
+
+//REGISTER ROUTE
+server.get("/register", (req, res) => {
+  res.render("register", {layout: false});
+})
+
+
+//SETTINGS ROUTE
+server.get("/settings", (req, res) => {
+  res.render("settings", {layout: "index"});
+})
+
+//CREATE POST ROUTE
+server.get("/create-post", (req, res) => {
+  res.render("createpost", {layout: "index"});
+})
+
+server.get("/profile", (req, res) => {
+  res.render("profile", {layout: "index"});
+})
