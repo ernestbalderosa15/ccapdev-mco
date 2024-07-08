@@ -61,6 +61,7 @@ a {
   border-radius: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   display: flex;
+  margin-bottom: 3%;
 }
 
 .container-box-top {
@@ -146,7 +147,7 @@ h1 {
   margin-right: 5px;
 }
 
-.post-actions .button {
+.post-actions button {
   border-radius: 10px;
   padding: 5px 10px;
   background-color: transparent;
@@ -156,11 +157,11 @@ h1 {
   cursor: pointer;
 }
 
-.post-actions .button i {
+.post-actions button i {
   margin-right: 5px;
 }
 
-.post-actions .button span {
+.post-actions button span {
   margin-left: 5px;
 }
 
@@ -220,17 +221,17 @@ h4 {
   border-radius: 20px;
 }
 
-#feed-main .container-box-feed form {
+.container-box-feed form {
   background-color: white;
   border-radius: 10px;
 }
 
-#feed-main .container-box-feed .form-control {
+.container-box-feed .form-control {
   border-radius: 10px;
   resize: none;
 }
 
-#feed-main .container-box-feed .btn {
+.container-box-feed .btn {
   border-radius: 10px;
   background-color: #161b8e;
   border: none;

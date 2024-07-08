@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>The Forum</title>
@@ -22,224 +22,233 @@
       href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="../public/style.css" />
-</head>
-<body>
-  <div class="p-3 text-center bg-white border-bottom">
-    <div class="container">
-      <div class="row">
-        <!-- Left elements -->
-        <div
-          class="col-md-4 d-flex justify-content-center justify-content-md-start mb-3 mb-md-0"
-        >
-          <a href="feed.html" class="ms-md-2 pt-1">
-            <h4>The Forum</h4>
-          </a>
-        </div>
-        <!-- Left elements -->
-
-        <!-- Center elements -->
-        <div class="col-md-4">
-          <form class="d-flex input-group w-auto my-auto mb-3 mb-md-0">
-            <input
-              autocomplete="off"
-              type="search"
-              class="form-control rounded"
-              placeholder="Search"
-            />
-            <span class="input-group-text border-0 d-none d-lg-flex">
-              <a href="search.html">
-                <i class="bi bi-search"></i>
-              </a>
-            </span>
-          </form>
-        </div>
-        <!-- Center elements -->
-
-        <!-- Right elements -->
-        <div
-          class="col-md-4 d-flex justify-content-center justify-content-md-end align-items-center"
-        >
-          <div class="d-flex">
-            <!-- Chat -->
-            <a class="text-reset me-3" href="#">
-              <i class="bi bi-chat-fill px-2"></i>Messages
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="p-3 text-center bg-white border-bottom">
+      <div class="container">
+        <div class="row">
+          <!-- Left elements -->
+          <div
+            class="col-md-4 d-flex justify-content-center justify-content-md-start mb-3 mb-md-0"
+          >
+            <a href="/" class="ms-md-2 pt-1">
+              <h4>The Forum</h4>
             </a>
+          </div>
+          <!-- Left elements -->
 
-            <!-- Notification -->
-            <div class="dropdown">
-              <a
-                class="text-reset me-3"
-                href="#"
-                role="button"
-                aria-expanded="false"
-              >
-                <i class="bi bi-bell-fill px-2"></i>Notifications
-              </a>
-            </div>
+          <!-- Center elements -->
+          <div class="col-md-4">
+            <form class="d-flex input-group w-auto my-auto mb-3 mb-md-0">
+              <input
+                autocomplete="off"
+                type="search"
+                class="form-control rounded"
+                placeholder="Search"
+              />
+              <span class="input-group-text border-0 d-none d-lg-flex">
+                <a href="search.html">
+                  <i class="bi bi-search"></i>
+                </a>
+              </span>
+            </form>
+          </div>
+          <!-- Center elements -->
 
-            <!-- User -->
-            <div class="dropdown">
-              <a
-                class="text-reset dropdown-toggle d-flex align-items-center hidden-arrow"
-                href="#"
-                id="navbarDropdownMenuLink"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                <img
-                  src="https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG.png"
-                  class="rounded-circle"
-                  height="22"
-                  alt=""
-                  loading="lazy"
-                />
+          <!-- Right elements -->
+          <div
+            class="col-md-4 d-flex justify-content-center justify-content-md-end align-items-center"
+          >
+            <div class="d-flex">
+              <!-- Chat -->
+              <a class="text-reset me-3" href="#">
+                <i class="bi bi-chat-fill px-2"></i>Messages
               </a>
-              <ul
-                class="dropdown-menu dropdown-menu-end"
-                aria-labelledby="navbarDropdownMenuLink"
-              >
-                <li><a class="dropdown-item" href="profilepage.html">My profile</a></li>
-                <li><a class="dropdown-item" href="#">Settings</a></li>
-                <li><a class="dropdown-item" href="login.html">Logout</a></li>
-              </ul>
+
+              <!-- Notification -->
+              <div class="dropdown">
+                <a
+                  class="text-reset me-3"
+                  href="#"
+                  role="button"
+                  aria-expanded="false"
+                >
+                  <i class="bi bi-bell-fill px-2"></i>Notifications
+                </a>
+              </div>
+
+              <!-- User -->
+              <div class="dropdown">
+                <a
+                  class="text-reset dropdown-toggle d-flex align-items-center hidden-arrow"
+                  href="#"
+                  id="navbarDropdownMenuLink"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  <img
+                    src="https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG.png"
+                    class="rounded-circle"
+                    height="22"
+                    alt=""
+                    loading="lazy"
+                  />
+                </a>
+                <ul
+                  class="dropdown-menu dropdown-menu-end"
+                  aria-labelledby="navbarDropdownMenuLink"
+                >
+                  <li>
+                    <a class="dropdown-item" href="profilepage.html"
+                      >My profile</a
+                    >
+                  </li>
+                  <li><a class="dropdown-item" href="#">Settings</a></li>
+                  <li><a class="dropdown-item" href="login.html">Logout</a></li>
+                </ul>
+              </div>
             </div>
           </div>
+          <!-- Right elements -->
         </div>
-        <!-- Right elements -->
       </div>
     </div>
-  </div>
-<br><br>
-  <div class="container" id="profile">
-    <div class="row justify-content-center">
-      <div class="col-2">
-        <div class="card" id="feed-user-card" style="width: 12rem; border-radius: 20px;">
-          <img
-            src="https://i.pravatar.cc/150?img=54"
-            alt="Profile Picture"
-            class="card-img-top"
-          />
-          <div class="row">
-            <h5>@RobertKilla</h5>
+    <br /><br />
+    <div class="container" id="profile">
+      <div class="row justify-content-center">
+        <div class="col-2">
+          <div
+            class="card"
+            id="feed-user-card"
+            style="width: 12rem; border-radius: 20px"
+          >
+            <img
+              src="https://i.pravatar.cc/150?img=54"
+              alt="Profile Picture"
+              class="card-img-top"
+            />
+            <div class="row">
+              <h5>@RobertKilla</h5>
+            </div>
+            <div class="row">
+              <i><p>10 posts</p></i>
+            </div>
           </div>
-          <div class="row">
-            <i><p>10 posts</p></i>
+        </div>
+
+        <br />
+
+        <div class="row justify-content-between">
+          <div
+            class="card"
+            style="width: 15rem; border-radius: 20px"
+            id="my-friends"
+          >
+            <h6>My Friends</h6>
+            <ul>
+              <li class="tag-item">Mang Tomas</li>
+              <li class="tag-item">Jimuel Santos</li>
+              <li class="tag-item">Jose Rizal</li>
+            </ul>
+          </div>
+        </div>
+
+        <h6>My Posts</h6>
+        <div class="container-box-feed mt-3">
+          <div class="content-feed">
+            <!-- Profile, Username, Time -->
+            <div class="post-feed">
+              <div class="user-avatar"></div>
+              <div class="post-content">
+                <p class="username">Juan Dela Cruz</p>
+                <p class="time">Posted 3 hours ago</p>
+              </div>
+            </div>
+            <!-- Post Title -->
+            <h1>Minecraft break!</h1>
+            <!-- Post Image -->
+            <img
+              src="https://www.minecraft.net/content/dam/archive/4da5ff0255092969c073274e0430e52d-6.png"
+              alt="Post Image"
+              class="post-image"
+            />
+          </div>
+        </div>
+
+        <div class="container-box-feed mt-3">
+          <div class="content-feed">
+            <!-- Profile, Username, Time -->
+            <div class="post-feed">
+              <div class="user-avatar"></div>
+              <div class="post-content">
+                <p class="username">Juan Dela Cruz</p>
+                <p class="time">Posted 6 hours ago</p>
+              </div>
+            </div>
+            <!-- Post Title -->
+            <h1>Feeling tired</h1>
+            <!-- Post Text -->
+            <p>Up late working on my CCAPDEV MCO!</p>
+          </div>
+        </div>
+
+        <div class="container-box-feed mt-3">
+          <div class="content-feed">
+            <!-- Profile, Username, Time -->
+            <div class="post-feed">
+              <div class="user-avatar"></div>
+              <div class="post-content">
+                <p class="username">Juan Dela Cruz</p>
+                <p class="time">Posted 3 days ago</p>
+              </div>
+            </div>
+            <!-- Post Title -->
+            <h1>Hi</h1>
+            <!-- Post Text -->
+            <p>Testing</p>
+          </div>
+        </div>
+
+        <div class="container-box-feed mt-3">
+          <div class="content-feed">
+            <!-- Profile, Username, Time -->
+            <div class="post-feed">
+              <div class="user-avatar"></div>
+              <div class="post-content">
+                <p class="username">Juan Dela Cruz</p>
+                <p class="time">Posted 1 week ago</p>
+              </div>
+            </div>
+            <!-- Post Title -->
+            <h1>Look at my cat</h1>
+            <!-- Post Text -->
+            <img
+              src="https://cdn.britannica.com/36/234736-050-4AC5B6D5/Scottish-fold-cat.jpg"
+              alt="Post Image"
+              class="post-image"
+            />
+          </div>
+        </div>
+
+        <div class="container-box-feed mt-3">
+          <div class="content-feed">
+            <!-- Profile, Username, Time -->
+            <div class="post-feed">
+              <div class="user-avatar"></div>
+              <div class="post-content">
+                <p class="username">Juan Dela Cruz</p>
+                <p class="time">Posted 3 months ago</p>
+              </div>
+            </div>
+            <!-- Post Title -->
+            <h1>My first post</h1>
+            <!-- Post Text -->
+            <p>Hi! I'm new here and this is my first post!</p>
           </div>
         </div>
       </div>
-
-      <br>
-
-      <div class="row justify-content-between">
-        <div class="card" style="width: 15rem; border-radius: 20px;" id="my-friends">
-          <h6>My Friends</h6>
-          <ul>
-            <li class="tag-item">Mang Tomas</li>
-            <li class="tag-item">Jimuel Santos</li>
-            <li class="tag-item">Jose Rizal</li>
-          </ul>
-        </div>  
-      </div>
-
-      <h6>My Posts</h6>
-        <div class="container-box-feed mt-3">
-          <div class="content-feed">
-          <!-- Profile, Username, Time -->
-            <div class="post-feed">
-              <div class="user-avatar"></div>
-                <div class="post-content">
-                  <p class="username">Juan Dela Cruz</p>
-                  <p class="time">Posted 3 hours ago</p>
-                </div>
-            </div>
-              <!-- Post Title -->
-              <h1>Minecraft break!</h1>
-              <!-- Post Image -->
-              <img
-                src="https://www.minecraft.net/content/dam/archive/4da5ff0255092969c073274e0430e52d-6.png"
-                alt="Post Image"
-                class="post-image"
-              />
-          </div> 
-        </div>
-
-        <div class="container-box-feed mt-3">
-          <div class="content-feed">
-            <!-- Profile, Username, Time -->
-            <div class="post-feed">
-              <div class="user-avatar"></div>
-                <div class="post-content">
-                  <p class="username">Juan Dela Cruz</p>
-                  <p class="time">Posted 6 hours ago</p>
-                </div>
-            </div>
-              <!-- Post Title -->
-              <h1>Feeling tired</h1>
-              <!-- Post Text -->
-              <p>Up late working on my CCAPDEV MCO!</p>
-          </div>
-        </div>
-
-        
-
-        <div class="container-box-feed mt-3">
-          <div class="content-feed">
-            <!-- Profile, Username, Time -->
-            <div class="post-feed">
-              <div class="user-avatar"></div>
-                <div class="post-content">
-                  <p class="username">Juan Dela Cruz</p>
-                  <p class="time">Posted 3 days ago</p>
-                </div>
-            </div>
-              <!-- Post Title -->
-              <h1>Hi</h1>
-              <!-- Post Text -->
-              <p>Testing</p>
-          </div>
-        </div>
-
-        <div class="container-box-feed mt-3">
-          <div class="content-feed">
-            <!-- Profile, Username, Time -->
-            <div class="post-feed">
-              <div class="user-avatar"></div>
-                <div class="post-content">
-                  <p class="username">Juan Dela Cruz</p>
-                  <p class="time">Posted 1 week ago</p>
-                </div>
-            </div>
-              <!-- Post Title -->
-              <h1>Look at my cat</h1>
-              <!-- Post Text -->
-              <img
-                src="https://cdn.britannica.com/36/234736-050-4AC5B6D5/Scottish-fold-cat.jpg"
-                alt="Post Image"
-                class="post-image"
-              />
-          </div>
-        </div>
-
-        <div class="container-box-feed mt-3">
-          <div class="content-feed">
-            <!-- Profile, Username, Time -->
-            <div class="post-feed">
-              <div class="user-avatar"></div>
-                <div class="post-content">
-                  <p class="username">Juan Dela Cruz</p>
-                  <p class="time">Posted 3 months ago</p>
-                </div>
-            </div>
-              <!-- Post Title -->
-              <h1>My first post</h1>
-              <!-- Post Text -->
-              <p>Hi! I'm new here and this is my first post!</p>
-          </div>
-        </div>
-
     </div>
-  </div>  
-</body>
+  </body>
 </html>

@@ -22,7 +22,7 @@
       href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="../public/style.css" />
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <div class="p-3 text-center bg-white border-bottom">
@@ -32,7 +32,7 @@
           <div
             class="col-md-4 d-flex justify-content-center justify-content-md-start mb-3 mb-md-0"
           >
-            <a href="feed.html" class="ms-md-2 pt-1">
+            <a href="/" class="ms-md-2 pt-1">
               <h4>The Forum</h4>
             </a>
           </div>
@@ -100,9 +100,15 @@
                   class="dropdown-menu dropdown-menu-end"
                   aria-labelledby="navbarDropdownMenuLink"
                 >
-                <li><a class="dropdown-item" href="profilepage.html">My profile</a></li>
-                <li><a class="dropdown-item" href="settings.html">Settings</a></li>
-                <li><a class="dropdown-item" href="login.html">Logout</a></li>
+                  <li>
+                    <a class="dropdown-item" href="profilepage.html"
+                      >My profile</a
+                    >
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="settings.html">Settings</a>
+                  </li>
+                  <li><a class="dropdown-item" href="login.html">Logout</a></li>
                 </ul>
               </div>
             </div>
@@ -116,7 +122,11 @@
       <div class="row justify-content-between">
         <!-- Left column -->
         <div class="col-2">
-          <div class="card" id="feed-user-card" style="width: 12rem; border-radius: 20px;">
+          <div
+            class="card"
+            id="feed-user-card"
+            style="width: 12rem; border-radius: 20px"
+          >
             <img
               src="https://i.pravatar.cc/150?img=54"
               alt="Profile Picture"
@@ -130,31 +140,51 @@
             </div>
           </div>
 
-          <div class="card mt-3" id="feed-user-card" style="width: 12rem; border-radius: 20px;">
-          <div class="card" style="width: 12rem; border-radius: 20px;" id="my-tags">
-            <h6>About me</h6>
-            <div class="row">
-              <i><p>Hi! I'm Robert, a software developer and a dog lover. I'm currently working on a new project and I'm looking for feedback. Feel free to message me!</p></i>
+          <div
+            class="card mt-3"
+            id="feed-user-card"
+            style="width: 12rem; border-radius: 20px"
+          >
+            <div
+              class="card"
+              style="width: 12rem; border-radius: 20px"
+              id="my-tags"
+            >
+              <h6>About me</h6>
+              <div class="row">
+                <i
+                  ><p>
+                    Hi! I'm Robert, a software developer and a dog lover. I'm
+                    currently working on a new project and I'm looking for
+                    feedback. Feel free to message me!
+                  </p></i
+                >
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="card mt-3"
+            id="feed-user-card"
+            style="width: 12rem; border-radius: 20px"
+          >
+            <div
+              class="card"
+              style="width: 12rem; border-radius: 20px"
+              id="my-tags"
+            >
+              <h6>My Tags</h6>
+              <ul>
+                <li class="tag-item">#Programming</li>
+                <li class="tag-item">#Dogs</li>
+                <li class="tag-item">#Cats</li>
+              </ul>
             </div>
           </div>
         </div>
-
-        <div class="card mt-3" id="feed-user-card" style="width: 12rem; border-radius: 20px;">
-          <div class="card" style="width: 12rem; border-radius: 20px;" id="my-tags">
-            <h6>My Tags</h6>
-            <ul>
-              <li class="tag-item">#Programming</li>
-              <li class="tag-item">#Dogs</li>
-              <li class="tag-item">#Cats</li>
-            </ul>
-          </div>
-        </div>
-
-        </div>
         <div class="col-8">
-
-           <!-- Comment -->
-           <a href="postPage.html">
+          <!-- Comment -->
+          <a href="postPage.html">
             <div class="container-box-feed">
               <div class="content">
                 <!-- Profile, Username, Time -->
@@ -164,16 +194,16 @@
                       src="https://i.pravatar.cc/150?img=54"
                       alt="avatar"
                       class="user-avatar"
-                      />
+                    />
                   </div>
                   <div class="post-content">
                     <p class="username">@RobertKilla</p>
                     <p class="time">1 minute ago</p>
                   </div>
-                </div>           
+                </div>
 
                 <!-- Post Title -->
-                <h1>Help! Need Tips for Starting a Balcony Garden                </h1>
+                <h1>Help! Need Tips for Starting a Balcony Garden</h1>
                 <!-- Post Buttons -->
                 <div class="post-actions">
                   <div class="button-container">
@@ -208,8 +238,8 @@
               <!-- Image -->
               <div class="image-container">
                 <img
-                src="https://www.thespruce.com/thmb/gF9yLFJBtskM1A1elZ20ZI8U-bU=/4285x0/filters:no_upscale():max_bytes(150000):strip_icc()/tips-for-starting-a-balcony-garden-847801-hero-f51f8bf03e1949ea95d429c842b6837c.jpg"
-                alt="Post Image"
+                  src="https://www.thespruce.com/thmb/gF9yLFJBtskM1A1elZ20ZI8U-bU=/4285x0/filters:no_upscale():max_bytes(150000):strip_icc()/tips-for-starting-a-balcony-garden-847801-hero-f51f8bf03e1949ea95d429c842b6837c.jpg"
+                  alt="Post Image"
                   class="square-image"
                 />
               </div>
@@ -220,22 +250,18 @@
           <a href="postPage.html">
             <div class="container-box-feed mt-3">
               <div class="content-feed">
-                <h1>New Productivity App: Feedback Needed!                </h1>
+                <h1>New Productivity App: Feedback Needed!</h1>
 
                 <div class="comment">
                   <div class="comment-avatar">
-                    <img
-                    src="https://i.pravatar.cc/150?img=54"
-                    alt=""
-                    />
+                    <img src="https://i.pravatar.cc/150?img=54" alt="" />
                   </div>
                   <div class="comment-body">
                     <div class="comment-username">
-                      @RobertKilla <span class="comment-time"> | 2 minutes ago</span>
+                      @RobertKilla
+                      <span class="comment-time"> | 2 minutes ago</span>
                     </div>
-                    <div class="comment-text">
-                      Hello!
-                    </div>
+                    <div class="comment-text">Hello!</div>
                   </div>
                 </div>
 
@@ -270,7 +296,7 @@
                     src="https://i.pravatar.cc/150?img=54"
                     alt="avatar"
                     class="user-avatar"
-                    />
+                  />
                 </div>
                 <div class="post-content">
                   <p class="username">@RobertKilla</p>
@@ -288,7 +314,7 @@
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
                   >
-                  &#8942;
+                    &#8942;
                   </button>
                   <ul
                     class="dropdown-menu dropdown-menu-end"
@@ -304,8 +330,8 @@
               <h1>Minecraft break!</h1>
               <!-- Post Image -->
               <img
-              src="https://www.minecraft.net/content/dam/archive/4da5ff0255092969c073274e0430e52d-6.png"
-              alt="Post Image"
+                src="https://www.minecraft.net/content/dam/archive/4da5ff0255092969c073274e0430e52d-6.png"
+                alt="Post Image"
                 class="post-image"
               />
               <!-- Post Buttons -->
@@ -343,16 +369,15 @@
             </div>
           </div>
 
-
-        <!-- 2nd Post -->
+          <!-- 2nd Post -->
           <div class="container-box-feed mt-3">
             <div class="content-feed">
               <div class="post-feed">
                 <div class="user-avatar">
                   <img
-                  src="https://i.pravatar.cc/150?img=54"
-                  alt="avatar"
-                  class="user-avatar"
+                    src="https://i.pravatar.cc/150?img=54"
+                    alt="avatar"
+                    class="user-avatar"
                   />
                 </div>
                 <div class="post-content">
@@ -371,7 +396,7 @@
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
                   >
-                  &#8942;
+                    &#8942;
                   </button>
                   <ul
                     class="dropdown-menu dropdown-menu-end"
@@ -384,10 +409,7 @@
               <!--Edit Button-->
 
               <h1>Feeling tired 😔</h1>
-              <div class="post-body">
-                Up late working on my CCAPDEV MCO!
-
-              </div>
+              <div class="post-body">Up late working on my CCAPDEV MCO!</div>
               <div class="post-actions">
                 <div class="button-container">
                   <div class="button hollow-button">
@@ -422,15 +444,15 @@
             </div>
           </div>
 
-        <!-- 3rd Post -->
+          <!-- 3rd Post -->
           <div class="container-box-feed mt-3">
             <div class="content-feed">
               <div class="post-feed">
                 <div class="user-avatar">
                   <img
-                  src="https://i.pravatar.cc/150?img=54"
-                  alt="avatar"
-                  class="user-avatar"
+                    src="https://i.pravatar.cc/150?img=54"
+                    alt="avatar"
+                    class="user-avatar"
                   />
                 </div>
                 <div class="post-content">
@@ -449,7 +471,7 @@
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
                   >
-                  &#8942;
+                    &#8942;
                   </button>
                   <ul
                     class="dropdown-menu dropdown-menu-end"
@@ -460,11 +482,11 @@
                 </div>
               </span>
               <!--Edit Button-->
-              
-              <h1>Look at my cat              </h1>
+
+              <h1>Look at my cat</h1>
               <img
-              src="https://cdn.britannica.com/36/234736-050-4AC5B6D5/Scottish-fold-cat.jpg"
-              alt="Post Image"
+                src="https://cdn.britannica.com/36/234736-050-4AC5B6D5/Scottish-fold-cat.jpg"
+                alt="Post Image"
                 class="post-image"
               />
               <div class="post-actions">
@@ -499,17 +521,17 @@
                 </div>
               </div>
             </div>
-          </div>        
-
-
+          </div>
         </div>
 
         <div class="col-2">
-
-          <div class="card" style="width: 12rem; border-radius: 20px;" id="my-tags">
+          <div
+            class="card"
+            style="width: 12rem; border-radius: 20px"
+            id="my-tags"
+          >
             <h6>Friend list</h6>
             <ul>
-              
               <li class="tag-item">@PlantLady</li>
               <li class="tag-item">@GamerSupreme</li>
               <li class="tag-item">@Bookworm87</li>
