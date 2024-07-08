@@ -1,13 +1,11 @@
-//Install Command:
-//npm init -y
-//npm i express express-handlebars body-parser mongoose
-
-const express = require('express');
+const express = require("express");
+const mongoose = require("mongoose");
+const { MongoClient, ObjectId } = require("mongodb");
 const server = express();
 const path = require("path");
 
-const bodyParser = require('body-parser')
-server.use(express.json()); 
+const bodyParser = require("body-parser");
+server.use(express.json());
 server.use(express.urlencoded({ extended: true }));
 
 const handlebars = require("express-handlebars");
