@@ -1,0 +1,255 @@
+{{> header_nav}}
+
+<div class="container" id="feed-main">
+  <div class="row justify-content-between">
+    <!-- Left column -->
+    {{> sidenav}}
+    <!-- Create post -->
+    <div class="col-8">
+
+
+      <!-- Post -->
+          <div class="container-box-feed">
+            
+            <div class="content-feed">
+                                <!-- Back Button -->
+                                <a href="/" class="form-back-button">
+                                    <i class="bi bi-arrow-left"></i> Back
+                                </a>
+            
+              <!-- Profile, Username, Time -->
+                <div class="post-feed">
+                <div class="user-avatar">
+                  <img
+                    src="https://i.pravatar.cc/150?img=12"
+                    alt="avatar"
+                    class="user-avatar"
+                    />
+                </div>
+                <div class="post-content">
+                  <p class="username">@TechWiz</p>
+                  <p class="time">Posted 2 hours ago</p>
+                </div>
+              </div>
+
+              
+              <!-- Post Title -->
+              <h1>New Productivity App: Feedback Needed!</h1>
+
+              <div class="post-body">
+                Hey everyone,
+                <br>
+                <br>
+                I'm working on a new productivity app called "FocusMe" and I'd love to get some early feedback on the design. The goal is to help users stay focused and avoid distractions.
+                <br>
+                <br>
+
+                I've attached a mockup of the main dashboard. It shows upcoming tasks, time tracking for projects, and a focus timer. Let me know what you think! Is it clear and easy to use? Any features you think are missing?
+              </body>
+              </div>
+              <!-- Post Image -->
+
+              <img
+              src="https://assets-global.website-files.com/6091b7081a1d7e13ccd7603a/62fffa792ce76923680da76f_Best-Student-Productivity-App-15-Forest.png"
+              alt="Post Image"
+                class="post-image"
+              />
+
+
+              <!-- Post Buttons -->
+              <div class="post-actions">
+                <div class="button-container">
+                  <div class="button hollow-button">
+                    <i class="bi bi-arrow-up"></i>
+                    <span class="upvotes">7</span>
+                  </div>
+                </div>
+                <div class="button-container">
+                  <div class="button hollow-button">
+                    <i class="bi bi-arrow-down"></i>
+                  </div>
+                </div>
+                <div class="button-container">
+                  <div class="button">
+                    <i class="bi bi-chat-dots"></i>
+                    <span class="comments">3</span>
+                  </div>
+                </div>
+                <div class="button-container">
+                  <div class="button">
+                    <i class="bi bi-bookmark"></i>
+                  </div>
+                </div>
+                <div class="button-container">
+                  <div class="button">
+                    <i class="bi bi-share"></i>
+                  </div>
+                </div>
+              </div>
+              <br><br>
+              <!-- comment -->
+              <form id="comment-form" class="d-flex input-group w-auto my-auto mb-3 mb-md-0">
+                <input 
+                  id="comment-input"
+                  autocomplete="off"
+                  type="Comment"
+                  class="form-control rounded"
+                  placeholder="Comment"
+                />
+                <span class="input-group-text border-0 d-none d-lg-flex">
+                  <button type="submit" >
+                    <i class="bi bi-plus-circle"></i>
+                  </button>
+                </span>
+              </form>
+
+              <!-- Comments Section -->
+              <div id = "comsec" class="comments-section mt-3">
+
+              </div>
+              <br>
+
+              
+            </div>
+          </div>
+
+    </div>
+      {{> sidebar1}}
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+
+
+<script>
+  
+  $(document).on("click", ".upvote-btn", function () {
+    const postId = $(this).data("post-id");
+    $.post("/upvote", { postId: postId }, function (data) {
+      if (data.success) {
+        $.get(`/post/${postId}`, function (postData) {
+          if (postData.success) {
+            const post = postData.post;
+            $(`.upvote-btn[data-post-id='${postId}'] .upvotes`).text(post.postUp);
+            $(`.downvote-btn[data-post-id='${postId}'] .downvotes`).text(post.postDown);
+            
+          } else {
+            console.error("Failed to load post data:", postData.message);
+          }
+        }).fail(function () {
+          console.error("Error occurred while fetching the post data");
+        });
+      } else {
+        console.error("Failed to upvote post:", data.message);
+      }
+    }).fail(function () {
+      console.error("Error occurred while making the upvote request");
+    });
+  });
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const commentForm = document.getElementById('comment-form');
+    const commentInput = document.getElementById('comment-input');
+    const commentsSection = document.getElementById('comsec');
+
+    commentForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        addComment(commentInput.value);
+        commentInput.value = '';
+    });
+
+    commentsSection.addEventListener('click', function(e) {
+        if (e.target.classList.contains('reply-btn')) {
+            replyToComment(e.target.closest('.comment'));
+        } else if (e.target.classList.contains('edit-btn')) {
+            editComment(e.target.closest('.comment'));
+        } else if (e.target.classList.contains('delete-btn')) {
+            deleteComment(e.target.closest('.comment'));
+        }
+    });
+
+    function addComment(text, parentComment = null) {
+    const newComment = document.createElement('div');
+    newComment.className = 'comment';
+    newComment.innerHTML = `
+        <div class="comment-avatar">
+            <img src="https://i.pravatar.cc/150?img=2">
+        </div>
+        <div class="comment-body">
+            <div class="comment-username">
+                @DesignEye <span class="comment-time"> | Just now</span>
+                <span class="comment-dropdown">
+                    <div class="dropdown">
+                        <button class="comment-dropdown-toggle float:right" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            &#8942;
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li class="dropdown-item reply-btn" >Reply</a></li>
+                            <li class="dropdown-item edit-btn" >Edit</a></li>
+                            <li class="dropdown-item delete-btn" >Delete</a></li>
+                            <li><a class="dropdown-item" href="#">Save</a></li>
+                            <li><a class="dropdown-item" href="#">Share</a></li>
+                        </ul>
+                    </div>
+                </span>
+            </div>
+            <div class="comment-text">${text}</div>
+            <div class="child-comments"></div>
+        </div>
+    `;
+    
+    if (parentComment) {
+        const childCommentsContainer = parentComment.querySelector('.child-comments');
+        childCommentsContainer.appendChild(newComment);
+    } else {
+        commentsSection.appendChild(newComment);
+    }
+}
+
+    function replyToComment(comment) {
+        const replyForm = document.createElement('form');
+        replyForm.innerHTML = `
+            <br><br>
+            <input type="text" class="form-control rounded" placeholder="Reply">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        `;
+        replyForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const replyText = this.querySelector('input').value;
+            addComment(replyText, comment);
+            this.remove();
+        });
+        comment.appendChild(replyForm);
+    }
+
+    function editComment(comment) {
+        const commentText = comment.querySelector('.comment-text');
+        const originalText = commentText.textContent;
+        const editInput = document.createElement('input');
+        editInput.type = 'text';
+        editInput.className = 'form-control rounded';
+        editInput.value = originalText;
+        commentText.replaceWith(editInput);
+
+        editInput.focus();
+        editInput.addEventListener('blur', function() {
+            const newText = this.value;
+            const newCommentText = document.createElement('div');
+            newCommentText.className = 'comment-text';
+            newCommentText.textContent = newText;
+            this.replaceWith(newCommentText);
+        });
+    }
+
+    function deleteComment(comment) {
+        if (confirm('Are you sure you want to delete this comment?')) {
+            comment.remove();
+        }
+    }
+});
+</script>
+
+
+

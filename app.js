@@ -198,3 +198,7 @@ server.get("/create-post", (req, res) => {
 server.get("/profile", (req, res) => {
   res.render("profile", {layout: "index"});
 })
+
+server.get("/post-page", (req, res) => {
+  res.render("postPage", {layout: "index"});
+})
