@@ -16,24 +16,13 @@
                     <h1>Create a Post</h1>
                     <form id="post-form" class="form-post-form" method="post">
                         <!-- Title -->
-                        <!-- PLS FIX THIS FORM, IDs are the same! @Myrine -->
                         <label for="post-title">Title:</label>
                         <input type="text" id="post-title" name="title" required />
 
                         <!-- Body -->
-                        <label for="post-body">Body:</label>
+                        <label for="editor">Body:</label>
                         <!-- Rich text editor-->
                         <div id="editor"></div>
-                        <input type="text" id="post-body" name="edit-about-me" required />
-                        {{!-- <script>
-                          //ClassicEditor.create(document.querySelector("#editor"))
-                            //.then((editor) => {
-                              //console.log(editor);
-                            })
-                            //.catch((error) => {
-                              //console.error(error);
-                            });
-                        </script> --}}
                     </form>
                     <div class="wrapper">
                         <i class="bi bi-tags-fill px-2"></i>Tags
@@ -48,11 +37,7 @@
                             <button>Remove All</button>
                         </div>
                     </div>
-                    <button
-                        type="button"
-                        class="form-post-form-button"
-                        onclick="window.location.href='/'"
-                    >
+                    <button type="button" class="form-post-form-button" id="submit-post">
                         Submit Post
                     </button>
                 </div>
@@ -63,10 +48,79 @@
     </div>
 </div>
 
-<script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
-    crossorigin="anonymous"
-></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
 <script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
-<script src="/js/script.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize CKEditor
+    ClassicEditor.create(document.querySelector("#editor"))
+        .then(editor => {
+            console.log(editor);
+        })
+        .catch(error => {
+            console.error(error);
+        });
+
+    // Tags functionality
+    const ul = document.querySelector(".tags ul");
+    const input = document.querySelector(".tags input");
+    const tagNumb = document.querySelector(".details span");
+    const removeBtn = document.querySelector(".details button");
+
+    let maxTags = 10,
+    tags = [];
+
+    function countTags() {
+        input.focus();
+        tagNumb.innerText = maxTags - tags.length;
+    }
+
+    function createTag() {
+        ul.querySelectorAll("li").forEach(li => li.remove());
+        tags.slice().reverse().forEach(tag => {
+            let liTag = `<li>${tag} <i class="bi bi-x" onclick="remove(this, '${tag}')"></i></li>`;
+            ul.insertAdjacentHTML("afterbegin", liTag);
+        });
+        countTags();
+    }
+
+    function remove(element, tag) {
+        let index = tags.indexOf(tag);
+        tags = [...tags.slice(0, index), ...tags.slice(index + 1)];
+        element.parentElement.remove();
+        countTags();
+    }
+
+    function addTag(e) {
+        if (e.key === "Enter") {
+            let tag = e.target.value.replace(/\s+/g, ' ');
+            if (tag.length > 1 && !tags.includes(tag)) {
+                if (tags.length < 10) {
+                    tag.split(',').forEach(tag => {
+                        tags.push(tag);
+                        createTag();
+                    });
+                }
+            }
+            e.target.value = "";
+        }
+    }
+
+    input.addEventListener("keyup", addTag);
+
+    removeBtn.addEventListener("click", () => {
+        tags.length = 0;
+        ul.querySelectorAll("li").forEach(li => li.remove());
+        countTags();
+    });
+
+    // Handle form submission
+    document.getElementById('submit-post').addEventListener('click', function() {
+        // Here you would typically send the data to your server
+        // For now, we'll just redirect to the home page
+        window.location.href = '/';
+    });
+
+    countTags();
+});
+</script>

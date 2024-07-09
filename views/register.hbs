@@ -57,15 +57,23 @@
     <header class="log-in">
         <div class="login-info">
             <h1>Register</h1><br>
-            <form action ="login.html">
-                <input type="text" placeholder="First Name" id="firstname" name="firstname">
-                <input type="text" placeholder="Last Name" id="lastname" name="lastname">
-                <input type="text" placeholder="username" id="logusername" name="logusername">
-                <input type="text" placeholder="email address" id="useremail" name="useremail">
-                <input type="text" placeholder="password" id="logpassword" name="logpassword">
-                <input type="text" placeholder="confirm password" id="confpass" name="confpass">
-                <input type="submit" value="Sign up">
+            {{#if error_msg}}
+  <div class="alert alert-danger">{{error_msg}}</div>
+{{/if}}
+
+            <form action="/register" method="POST">
+            <input type="text" name="firstName" required placeholder="First Name">
+            <input type="text" name="lastName" required placeholder="Last Name">
+            <input type="text" name="username" required placeholder="Username">
+            
+            <input type="text" name="email" required placeholder="Email">
+            <input type="text" name="password" required placeholder="Password">
+            <input type="text" name="confirmPassword" required placeholder="Confirm Password">
+            <input type="submit" value="Register">
             </form>
+            </br>
+            <p>Already have an account? <a href="/login">Login here</a></p>
+
         </div>
 </div>
 </body>

@@ -1,3 +1,8 @@
+//Install Command:
+//npm init -y
+//npm i express express-handlebars body-parser mongoose express-session connect-flash
+//npm install bcrypt jsonwebtoken nodemailer
+
 const express = require("express");
 const mongoose = require("mongoose");
 const { MongoClient, ObjectId } = require("mongodb");
@@ -19,11 +24,12 @@ server.engine(
 );
 
 const uri =
-  "mongodb+srv://ernestbalderosa:pAuGvXMwMsmYkQeL@cluster0.hhgoid5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+"mongodb+srv://myrinetumbaga:4BCCefiV25OZDmMN@cluster0.uiczv67.mongodb.net/TheForum?retryWrites=true&w=majority&appName=Cluster0";
 
 const client = new MongoClient(uri);
 
 let postColl;
+let userColl;
 
 async function connectToDatabase() {
   try {
@@ -32,6 +38,8 @@ async function connectToDatabase() {
 
     const db = client.db("TheForum");
     postColl = db.collection("posts");
+    userColl = db.collection("users");
+
 
     // Start the server after database connection is established
     const port = process.env.PORT || 9090;
@@ -66,20 +74,34 @@ const postSchema = new Schema({
 const Post = mongoose.model("Post", postSchema);
 
 
-const userSchema = new Schema({
-  _id: String,
-  userImg: String,
-  username: String,
-  name: String,
-  password: String, //[TO FIX - need to add more logic here to hash the password]
-  userPosts: Array, //ARRAY OF POSTS
-  userComments: Array, //ARRAY OF COMMENTS
-  userTags: Array, //ARRAY OF STRINGS
-  savedPosts: Array, //ARRAY OF POSTS
-  friendList: Array //ARRAY OF USERS
-})
+const bcrypt = require('bcrypt');
 
-const User = mongoose.model("User", userSchema);
+const userSchema = new mongoose.Schema({
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
+  username: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  userImg: { type: String, default: 'default-profile-image.jpg' },
+  userPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
+  userComments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
+  userTags: [String],
+  savedPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
+  friendList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
+});
+
+userSchema.pre('save', async function(next) {
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
+  next();
+});
+
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  return bcrypt.compare(candidatePassword, this.password);
+};
+
+const User = mongoose.model('User', userSchema);
 
 //FUNCTIONS for feed posts.
 
@@ -173,17 +195,86 @@ server.get("/show-posts", async (req, res) => {
 connectToDatabase().catch(console.dir);
 
 
-//LOGIN ROUTE
+// For login and register
+const session = require('express-session');
+const flash = require('connect-flash');
+
+server.use(session({
+  secret: 'your secret key',
+  resave: false,
+  saveUninitialized: true
+}));
+server.use(flash());
+
+// Middleware to make flash messages available to all templates
+server.use((req, res, next) => {
+  res.locals.success_msg = req.flash('success_msg');
+  res.locals.error_msg = req.flash('error_msg');
+  next();
+});
+
 server.get("/login", (req,res) => {
   res.render("login", {layout: false});
 });
 
+server.post("/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const user = await User.findOne({ username });
+    if (!user) {
+      req.flash('error_msg', 'User not found');
+      return res.redirect('/login');
+    }
+    const isMatch = await user.comparePassword(password);
+    if (isMatch) {
+      req.session.userId = user._id; // Set user ID in session
+      return res.redirect('/');
+    } else {
+      req.flash('error_msg', 'Invalid password');
+      return res.redirect('/login');
+    }
+  } catch (error) {
+    console.error(error);
+    req.flash('error_msg', 'Error logging in');
+    res.redirect('/login');
+  }
+});
 
-//REGISTER ROUTE
 server.get("/register", (req, res) => {
   res.render("register", {layout: false});
-})
+});
 
+server.post("/register", async (req, res) => {
+  try {
+    const { firstName, lastName, username, email, password, confirmPassword } = req.body;
+    
+    if (!firstName || !lastName || !username || !email || !password || !confirmPassword) {
+      req.flash('error_msg', 'All fields are required');
+      return res.redirect('/register');
+    }
+    
+    if (password !== confirmPassword) {
+      req.flash('error_msg', 'Passwords do not match');
+      return res.redirect('/register');
+    }
+    
+    const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+    if (existingUser) {
+      req.flash('error_msg', 'Username or email already in use');
+      return res.redirect('/register');
+    }
+    
+    const user = new User({ firstName, lastName, username, email, password });
+    await user.save();
+    
+    req.flash('success_msg', 'You have successfully registered');
+    res.redirect('/login');
+  } catch (error) {
+    console.error("Registration error:", error);
+    req.flash('error_msg', 'Error registering user');
+    res.redirect('/register');
+  }
+});
 
 //SETTINGS ROUTE
 server.get("/settings", (req, res) => {
@@ -199,6 +290,7 @@ server.get("/profile", (req, res) => {
   res.render("profile", {layout: "index"});
 })
 
+//POST PAGE ROUTE
 server.get("/post-page", (req, res) => {
   res.render("postPage", {layout: "index"});
 })
