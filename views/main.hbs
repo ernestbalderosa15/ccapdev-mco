@@ -18,6 +18,7 @@
       {{#each post_data}}
 <div class="container-box-feed" id="postbox">
   <div class="content-feed">
+    <!--Author and Time Posted-->
     <div class="post-feed">
       <div class="user-avatar">
         <img src="{{authorImg}}" alt="avatar" class="user-avatar" />
@@ -27,13 +28,16 @@
         <p class="time">Posted {{postDate}}</p>
       </div>
     </div>
+    <!--Post Body-->
     <h1>{{postTitle}}</h1>
     <img src="{{postImg}}" alt="Post Image" class="post-image" />
     <br/>
+    <!--Tags-->
       {{#each postTags}}
             <button class="post-tag">{{this}}</button>
           {{/each}}
     <div class="post-actions">
+      <!--Votes-->
       <div class="button-container">
         <button class="hollow-button upvote-btn" data-post-id={{_id}}>
           <i class="bi bi-arrow-up"></i>
@@ -46,6 +50,7 @@
           <span class="downvotes">{{postDown}}</span>
         </button>
       </div>
+      <!--Expand post-->
       <div class="button-container">
         <a href="/post-page">
           <div class="button">
@@ -54,6 +59,7 @@
           </div>
         </a>
       </div>
+      <!--Bookmark-->
       <div class="button-container">
         <div class="button">
           {{#if postSaved}}

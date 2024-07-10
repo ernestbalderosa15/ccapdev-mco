@@ -102,7 +102,7 @@
                 </div>
               </div>
               <br><br>
-              <!-- comment -->
+              <!-- comment form -->
               <form id="comment-form" class="d-flex input-group w-auto my-auto mb-3 mb-md-0">
                 <input 
                   id="comment-input"
@@ -139,7 +139,7 @@
 
 
 <script>
-  
+  //upvote
   $(document).on("click", ".upvote-btn", function () {
     const postId = $(this).data("post-id");
     $.post("/upvote", { postId: postId }, function (data) {
@@ -192,17 +192,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 <script>
+  //add listeners for comment actions
 document.addEventListener('DOMContentLoaded', function() {
     const commentForm = document.getElementById('comment-form');
     const commentInput = document.getElementById('comment-input');
     const commentsSection = document.getElementById('comsec');
 
+    //comment box
     commentForm.addEventListener('submit', function(e) {
         e.preventDefault();
         addComment(commentInput.value);
         commentInput.value = '';
     });
 
+    //comment dropdown
     commentsSection.addEventListener('click', function(e) {
         if (e.target.classList.contains('reply-btn')) {
             replyToComment(e.target.closest('.comment'));
@@ -214,6 +217,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function addComment(text, parentComment = null) {
+    //craete comment div 
     const newComment = document.createElement('div');
     newComment.className = 'comment';
     newComment.innerHTML = `
@@ -242,7 +246,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="child-comments"></div>
         </div>
     `;
-    
+    //append comment
     if (parentComment) {
         const childCommentsContainer = parentComment.querySelector('.child-comments');
         childCommentsContainer.appendChild(newComment);
@@ -250,7 +254,7 @@ document.addEventListener('DOMContentLoaded', function() {
         commentsSection.appendChild(newComment);
     }
 }
-
+    //show reply form
     function replyToComment(comment) {
         const replyForm = document.createElement('form');
         replyForm.innerHTML = `
@@ -262,15 +266,16 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             const replyText = this.querySelector('input').value;
             addComment(replyText, comment);
-            this.remove();
+            this.remove();//remove form when comment is submitted
         });
         comment.appendChild(replyForm);
     }
-
+    //replace comment text
     function editComment(comment) {
         const commentText = comment.querySelector('.comment-text');
         const originalText = commentText.textContent;
         const editInput = document.createElement('input');
+        
         editInput.type = 'text';
         editInput.className = 'form-control rounded';
         editInput.value = originalText;
@@ -285,7 +290,7 @@ document.addEventListener('DOMContentLoaded', function() {
             this.replaceWith(newCommentText);
         });
     }
-
+    //remove comment div
     function deleteComment(comment) {
         if (confirm('Are you sure you want to delete this comment?')) {
             comment.remove();

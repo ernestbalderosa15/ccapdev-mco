@@ -1,0 +1,27 @@
+insert in express
+
+{
+  "_id": {
+    "$oid": "6689e7888d99ea9e4463fd07"
+  },
+  "authorImg": "https://i.pravatar.cc/150?img=54",
+  "author": "@RobertKilla",
+  "postDate": "2018-04-15T16:54:40.000Z",
+  "postTitle": "Help! Need Tips for Starting a Balcony Garden",
+  "postImg": "https://www.thespruce.com/thmb/gF9yLFJBtskM1A1elZ20ZI8U-bU=/4285x0/filters:no_upscale():max_bytes(150000):strip_icc()/tips-for-starting-a-balcony-garden-847801-hero-f51f8bf03e1949ea95d429c842b6837c.jpg",
+  "postTags": [
+    "programming"
+  ],
+  "postUp": 4,
+  "postDown": 0,
+  "postComCnt": 0,
+  "postSaved": true,
+  "usersUpvoted": [
+    "programming"
+  ]
+}
+
+
+
+
+

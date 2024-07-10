@@ -103,12 +103,15 @@ const User = mongoose.model('User', userSchema);
 
 // Routes
 
+//display main page
 server.get("/", async (req, res) => {
   try {
+    //get posts from db
     console.log("Attempting to fetch posts from database...");
     const posts = await Post.find().lean();
     console.log("Raw posts from database:", posts);
 
+    //check if there are posts
     if (!posts || posts.length === 0) {
       console.log("No posts found in the database.");
       return res.render("main", { layout: "index", post_data: [], debug_msg: "No posts found in the database." });
@@ -121,6 +124,7 @@ server.get("/", async (req, res) => {
     }));
     console.log("Formatted posts:", formattedPosts);
 
+    //display feed
     res.render("main", { layout: "index", post_data: formattedPosts, debug_msg: `Found ${formattedPosts.length} posts.` });
   } catch (err) {
     console.error("Error in main route:", err);
@@ -128,6 +132,7 @@ server.get("/", async (req, res) => {
   }
 });
 
+//upvote function
 server.post("/upvote", async (req, res) => {
   const postId = req.body.postId;
   const userId = "user1"; // Example user ID, replace with actual user ID logic [TO FIX]
@@ -156,6 +161,8 @@ server.post("/upvote", async (req, res) => {
     res.status(500).json({ success: false, message: "Error upvoting post" });
   }
 });
+
+//expand post from main page
 server.get("/post/:id", async (req, res) => {
   const postId = req.params.id;
   
