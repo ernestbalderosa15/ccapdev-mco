@@ -27,7 +27,6 @@
 
           <form id="post-form" class="form-post-form" method="post">
             <!-- Title -->
-            <!-- PLS FIX THIS FORM, IDs are the same! @Myrine -->
             <label for="edit-username">Edit username:</label>
             <input type="text" id="edit-username" name="username" required />
 
@@ -42,15 +41,12 @@
             <!-- Rich text editor -->
             <div id="editor"></div>
             <input type="hidden" id="post-body" name="edit-about-me" required />
-          </form>
 
-          <button
-            type="button"
-            class="form-post-form-button"
-            onclick="window.location.href='/'"
-          >
-            Submit Changes
-          </button>
+            <!-- Submit Button -->
+            <button type="submit" class="form-post-form-button">
+              Submit Changes
+            </button>
+          </form>
         </div>
       </div>
     </div>
@@ -58,4 +54,20 @@
   </div>
 </div>
 
-
+<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize CKEditor
+    ClassicEditor.create(document.querySelector("#editor"))
+        .then(editor => {
+            // Listen to form submission
+            document.getElementById('post-form').addEventListener('submit', function() {
+                // Transfer content from CKEditor to hidden input field
+                document.getElementById('post-body').value = editor.getData();
+            });
+        })
+        .catch(error => {
+            console.error(error);
+        });
+});
+</script>

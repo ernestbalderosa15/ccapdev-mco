@@ -1,62 +1,63 @@
-//Install Command:
-//npm init -y
-//npm i express express-handlebars body-parser mongoose express-session connect-flash
-//npm install bcrypt jsonwebtoken nodemailer
-
 const express = require("express");
 const mongoose = require("mongoose");
-const { MongoClient, ObjectId } = require("mongodb");
-const server = express();
 const path = require("path");
-
 const bodyParser = require("body-parser");
+const session = require('express-session');
+const flash = require('connect-flash');
+const bcrypt = require('bcrypt');
+const handlebars = require("express-handlebars");
+
+const server = express();
+
+// Handlebars setup
+const hbs = handlebars.create({
+  extname: "hbs",
+  runtimeOptions: {
+    allowProtoPropertiesByDefault: true,
+    allowProtoMethodsByDefault: true
+  }
+});
+
+server.engine("hbs", hbs.engine);
+server.set("view engine", "hbs");
+
+// Middleware
 server.use(express.json());
 server.use(express.urlencoded({ extended: true }));
-
-const handlebars = require("express-handlebars");
-const { Schema } = require("mongoose");
-server.set("view engine", "hbs");
-server.engine(
-  "hbs",
-  handlebars.engine({
-    extname: "hbs",
-  })
-);
-
-const uri =
-"mongodb+srv://myrinetumbaga:4BCCefiV25OZDmMN@cluster0.uiczv67.mongodb.net/TheForum?retryWrites=true&w=majority&appName=Cluster0";
-
-const client = new MongoClient(uri);
-
-let postColl;
-let userColl;
-
-async function connectToDatabase() {
-  try {
-    await client.connect();
-    console.log("Connected to database");
-
-    const db = client.db("TheForum");
-    postColl = db.collection("posts");
-    userColl = db.collection("users");
-
-
-    // Start the server after database connection is established
-    const port = process.env.PORT || 9090;
-    server.listen(port, function () {
-      console.log("Listening at port " + port);
-    });
-  } catch (e) {
-    console.error(e);
-  }
-}
-
-//server.use(express.static("public"));
 server.use(express.static(path.join(__dirname, 'public')));
 server.use(express.static(path.join(__dirname, 'Pages')));
+server.use(session({
+  secret: 'your secret key',
+  resave: false,
+  saveUninitialized: true
+}));
+server.use(flash());
 
-//SCHEMAS
-const postSchema = new Schema({
+server.use((req, res, next) => {
+  res.locals.success_msg = req.flash('success_msg');
+  res.locals.error_msg = req.flash('error_msg');
+  next();
+});
+
+// Database connection
+const uri = "mongodb+srv://myrinetumbaga:4BCCefiV25OZDmMN@cluster0.uiczv67.mongodb.net/TheForum?retryWrites=true&w=majority&appName=Cluster0";
+
+mongoose.connect(uri, { 
+  useNewUrlParser: true, 
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 5000 // 5 second timeout
+})
+.then(() => console.log('Connected to MongoDB'))
+.catch(err => console.error('Could not connect to MongoDB:', err));
+
+mongoose.connection.on('error', err => {
+  console.error('MongoDB connection error:', err);
+});
+
+console.log("Server starting...", new Date().toISOString());
+
+// Schemas and Models
+const postSchema = new mongoose.Schema({
   _id: String,
   authorImg: String,
   author: String,
@@ -69,12 +70,9 @@ const postSchema = new Schema({
   postComCount: Number,
   postSaved: Boolean,
   usersUpvoted: Array,
-});
+}, { collection: 'posts' });
 
 const Post = mongoose.model("Post", postSchema);
-
-
-const bcrypt = require('bcrypt');
 
 const userSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
@@ -88,7 +86,7 @@ const userSchema = new mongoose.Schema({
   userTags: [String],
   savedPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
   friendList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
-});
+}, { collection: 'users' });
 
 userSchema.pre('save', async function(next) {
   if (this.isModified('password')) {
@@ -103,114 +101,89 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
 
 const User = mongoose.model('User', userSchema);
 
-//FUNCTIONS for feed posts.
+// Routes
 
 server.get("/", async (req, res) => {
   try {
-    const posts = await postColl.find().toArray();
-    res.render("main", { layout: "index", post_data: posts });
+    console.log("Attempting to fetch posts from database...");
+    const posts = await Post.find().lean();
+    console.log("Raw posts from database:", posts);
+
+    if (!posts || posts.length === 0) {
+      console.log("No posts found in the database.");
+      return res.render("main", { layout: "index", post_data: [], debug_msg: "No posts found in the database." });
+    }
+
+    const formattedPosts = posts.map(post => ({
+      ...post,
+      postTags: Array.isArray(post.postTags) ? post.postTags : [],
+      postSaved: Boolean(post.postSaved)
+    }));
+    console.log("Formatted posts:", formattedPosts);
+
+    res.render("main", { layout: "index", post_data: formattedPosts, debug_msg: `Found ${formattedPosts.length} posts.` });
   } catch (err) {
-    console.error(err);
-    res.status(500).send("Error fetching posts");
+    console.error("Error in main route:", err);
+    res.status(500).render("main", { layout: "index", post_data: [], debug_msg: "Error fetching posts: " + err.message });
   }
 });
 
-//create an upvote feature according to the main.hbs [TO FIX]
 server.post("/upvote", async (req, res) => {
   const postId = req.body.postId;
   const userId = "user1"; // Example user ID, replace with actual user ID logic [TO FIX]
   
   try {
-    const post = await postColl.findOne({ _id: postId });
+    const post = await Post.findById(postId);
     if (!post) {
-      return res.status(404).send("Post not found");
+      return res.status(404).json({ success: false, message: "Post not found" });
     }
 
-    let updatedPost;
-    if (post.usersUpvoted.includes(userId)) {
+    const index = post.usersUpvoted.indexOf(userId);
+    if (index > -1) {
       // User already upvoted, so remove their upvote
-      updatedPost = await postColl.findOneAndUpdate(
-        { _id: postId },
-        { 
-          $inc: { postUp: -1 },
-          $pull: { usersUpvoted: userId }
-        },
-        { returnDocument: 'after' }
-      );
+      post.usersUpvoted.splice(index, 1);
+      post.postUp -= 1;
     } else {
       // User hasn't upvoted yet, so add their upvote
-      updatedPost = await postColl.findOneAndUpdate(
-        { _id: postId },
-        { 
-          $inc: { postUp: 1 },
-          $push: { usersUpvoted: userId }
-        },
-        { returnDocument: 'after' }
-      );
+      post.usersUpvoted.push(userId);
+      post.postUp += 1;
     }
 
-    if (!updatedPost.value) {
-      return res.status(404).send("Failed to update post");
-    }
-
-    res.send({ success: true, postUp: updatedPost.value.postUp });
+    await post.save();
+    res.json({ success: true, postUp: post.postUp });
   } catch (err) {
     console.error(err);
-    res.status(500).send("Error upvoting post");
+    res.status(500).json({ success: false, message: "Error upvoting post" });
   }
 });
-
 server.get("/post/:id", async (req, res) => {
   const postId = req.params.id;
   
   try {
-    const post = await postColl.findOne({ _id: postId });
+    const post = await Post.findById(postId).lean();
     if (!post) {
       return res.status(404).send({ success: false, message: "Post not found" });
     }
-    res.send({ success: true, post });
+    const formattedPost = {
+      ...post,
+      postTags: Array.isArray(post.postTags) ? post.postTags : [],
+      postSaved: Boolean(post.postSaved)
+    };
+    res.send({ success: true, post: formattedPost });
   } catch (err) {
     console.error(err);
     res.status(500).send({ success: false, message: "Error fetching post data" });
   }
 });
 
-
-//For internal purposes only [REMOVE]
-server.get("/show-posts", async (req, res) => {
+server.get("/db-check", async (req, res) => {
   try {
-    const posts = await postColl.find().toArray();
-    console.log(posts); // Log posts array to console
-    posts.forEach((post) => {
-      console.log("ID: ", post._id);
-      
-    })
-    res.render("main", { layout: "index", post_data: posts });
+    const count = await Post.countDocuments();
+    res.send(`Database connection successful. There are ${count} posts in the database.`);
   } catch (err) {
-    console.error(err);
-    res.status(500).send("Error fetching posts");
+    console.error("Database check error:", err);
+    res.status(500).send("Error connecting to database: " + err.message);
   }
-});
-
-connectToDatabase().catch(console.dir);
-
-
-// For login and register
-const session = require('express-session');
-const flash = require('connect-flash');
-
-server.use(session({
-  secret: 'your secret key',
-  resave: false,
-  saveUninitialized: true
-}));
-server.use(flash());
-
-// Middleware to make flash messages available to all templates
-server.use((req, res, next) => {
-  res.locals.success_msg = req.flash('success_msg');
-  res.locals.error_msg = req.flash('error_msg');
-  next();
 });
 
 server.get("/login", (req,res) => {
@@ -258,39 +231,52 @@ server.post("/register", async (req, res) => {
       return res.redirect('/register');
     }
     
+    console.log('Attempting to find existing user');
     const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+    console.log('Existing user check complete');
+    
     if (existingUser) {
       req.flash('error_msg', 'Username or email already in use');
       return res.redirect('/register');
     }
     
+    console.log('Creating new user');
     const user = new User({ firstName, lastName, username, email, password });
     await user.save();
+    console.log('New user saved successfully');
     
     req.flash('success_msg', 'You have successfully registered');
     res.redirect('/login');
   } catch (error) {
     console.error("Registration error:", error);
+    console.error("Error stack:", error.stack);
     req.flash('error_msg', 'Error registering user');
     res.redirect('/register');
   }
 });
 
-//SETTINGS ROUTE
 server.get("/settings", (req, res) => {
   res.render("settings", {layout: "index"});
-})
+});
 
-//CREATE POST ROUTE
 server.get("/create-post", (req, res) => {
   res.render("createpost", {layout: "index"});
-})
+});
 
 server.get("/profile", (req, res) => {
   res.render("profile", {layout: "index"});
-})
+});
 
-//POST PAGE ROUTE
 server.get("/post-page", (req, res) => {
   res.render("postPage", {layout: "index"});
+});
+
+server.get("/about", (req, res) => {
+  res.render("about", {layout: "index"});
 })
+
+// Start the server
+const port = process.env.PORT || 9090;
+server.listen(port, function () {
+  console.log("Listening at port " + port);
+});

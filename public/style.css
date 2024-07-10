@@ -465,6 +465,17 @@ margin-top: -25px;
   border: none;
 }
 
+  .upvote-btn.active {
+    background-color: #304fb6;
+    color: white;
+  }
+
+  .centered-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
 
 .back-button {
   display: flex;
