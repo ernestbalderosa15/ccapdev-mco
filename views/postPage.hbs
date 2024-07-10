@@ -34,16 +34,17 @@
 
               <span class="post-dropdown">
                     <div class="dropdown">
-                        <button class="post-dropdown-toggle float:right" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button class="post-dropdown-toggle float-end" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             &#8942;
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-       <li class="dropdown-item post-edit-btn">Edit</li>
-          <li class="dropdown-item post-delete-btn">Delete</li>
+                            <li><button class="dropdown-item post-edit-btn" type="button">Edit</button></li>
+                            <li><button class="dropdown-item post-delete-btn" type="button">Delete</button></li>
                         </ul>
                     </div>
                 </span>
 
+              
               
               <!-- Post Title -->
               <h1>New Productivity App: Feedback Needed!</h1>
@@ -128,6 +129,8 @@
     </div>
       {{> sidebar1}}
   </div>
+
+  
 </div>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
@@ -158,6 +161,21 @@
       console.error("Error occurred while making the upvote request");
     });
   });
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const editBtn = document.querySelector('.post-edit-btn');
+    
+    if (editBtn) {
+        editBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (confirm('Are you sure you want to edit this post?')) {
+                alert('The Edit feature is still to be implemented.');
+            }
+        });
+    }
+});
 </script>
 
 <script>
@@ -261,71 +279,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    
-    // Post edit and delete functionality
-    const postEditBtn = document.querySelector('.post-edit-btn');
-    const postDeleteBtn = document.querySelector('.post-delete-btn');
-    const postId = document.querySelector('.container-box-feed').dataset.postId;
 
-    postEditBtn.addEventListener('click', function() {
-        editPost(postId);
-    });
-
-    postDeleteBtn.addEventListener('click', function() {
-        deletePost(postId);
-    });
-
-    function editPost(postId) {
-        const postTitle = document.querySelector('.post-title');
-        const postBody = document.querySelector('.post-body');
-        const originalTitle = postTitle.textContent;
-        const originalBody = postBody.textContent;
-
-        const editTitleInput = document.createElement('input');
-        editTitleInput.type = 'text';
-        editTitleInput.className = 'form-control rounded';
-        editTitleInput.value = originalTitle;
-
-        const editBodyTextarea = document.createElement('textarea');
-        editBodyTextarea.className = 'form-control rounded';
-        editBodyTextarea.value = originalBody;
-
-        postTitle.replaceWith(editTitleInput);
-        postBody.replaceWith(editBodyTextarea);
-
-        editTitleInput.focus();
-        editBodyTextarea.focus();
-
-        editTitleInput.addEventListener('blur', function() {
-            const newTitle = this.value;
-            const newPostTitle = document.createElement('h1');
-            newPostTitle.className = 'post-title';
-            newPostTitle.textContent = newTitle;
-            this.replaceWith(newPostTitle);
-        });
-
-        editBodyTextarea.addEventListener('blur', function() {
-            const newBody = this.value;
-            const newPostBody = document.createElement('div');
-            newPostBody.className = 'post-body';
-            newPostBody.textContent = newBody;
-            this.replaceWith(newPostBody);
-        });
-    }
-
-    function deletePost(postId) {
-        if (confirm('Are you sure you want to delete this post?')) {
-            $.post(`/delete-post/${postId}`, function(data) {
-                if (data.success) {
-                    window.location.href = '/main.hbs';
-                } else {
-                    console.error("Failed to delete post:", data.message);
-                }
-            }).fail(function() {
-                console.error("Error occurred while making the delete request");
-            });
-        }
-    }
 });
 </script>
 

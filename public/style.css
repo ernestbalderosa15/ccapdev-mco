@@ -455,6 +455,17 @@ margin-top: -25px;
   background-color: #161b8e;
 }
 
+.dropdown-menu .dropdown-item {
+  font-size: 14px;  /* Adjust this value as needed */
+}
+
+.post-dropdown-toggle {
+  font-size: 18px;  /* Adjust this for the size of the three dots */
+  background: none;
+  border: none;
+}
+
+
 .back-button {
   display: flex;
   align-items: center;
