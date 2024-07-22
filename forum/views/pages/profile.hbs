@@ -1,0 +1,111 @@
+{{!-- pages/profile.hbs --}}
+
+<div id="about" class="profile-box about-me">
+    <h2>About Me</h2>
+    <p>{{user.aboutMe}}</p>
+</div>
+
+<div id="posts" style="display: none;">
+    {{#each user.posts}}
+        <div class="post profile-box" data-id="{{this.id}}">
+            <div class="post-header">
+                <div class="post-user">
+                    <img src="{{../user.avatar}}" alt="{{../user.name}}" class="avatar small">
+                    <span class="username">{{../user.name}}</span>
+                </div>
+                <span class="post-time">{{this.time}}</span>
+            </div>
+            <h3 class="post-title">{{this.title}}</h3>
+            <img src="https://via.placeholder.com/400x200" alt="Post image" class="post-image">
+            <div class="post-stats">
+                <div class="post-stats-left">
+                    <button class="btn-icon">
+                        <span class="material-icons">arrow_upward</span>
+                        <span>{{this.upvotes}}</span>
+                    </button>
+                    <button class="btn-icon">
+                        <span class="material-icons">arrow_downward</span>
+                        <span>{{this.downvotes}}</span>
+                    </button>
+                    <button class="btn-icon">
+                        <span class="material-icons">comment</span>
+                        <span>{{this.comments.length}}</span>
+                    </button>
+                </div>
+                <div class="post-stats-right">
+                    <button class="btn-icon">
+                        <span class="material-icons">bookmark</span>
+                    </button>
+                    <button class="btn-icon">
+                        <span class="material-icons">share</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    {{/each}}
+</div>
+
+<div id="comments" style="display: none;">
+    {{#each user.comments}}
+        <div class="comment profile-box" data-post-id="{{this.postId}}">
+            <div class="comment-header">
+                <div class="comment-user">
+                    <img src="{{../user.avatar}}" alt="{{../user.name}}" class="avatar small">
+                    <span class="username">{{../user.name}}</span>
+                </div>
+                <span class="comment-time">{{this.time}}</span>
+            </div>
+            <div class="comment-content">
+                <p>{{this.content}}</p>
+            </div>
+            <button class="btn-view-post">
+                <span class="material-icons">arrow_outward</span>
+            </button>
+        </div>
+    {{/each}}
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const navLinks = document.querySelectorAll('.left-column nav a');
+        const sections = document.querySelectorAll('.middle-column > div');
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                sections.forEach(section => {
+                    section.style.display = section.id === targetId ? 'block' : 'none';
+                });
+                // Remove 'active' class from all links and add to the clicked one
+                navLinks.forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Add click event to posts to redirect to post page
+        const posts = document.querySelectorAll('.post');
+        posts.forEach(post => {
+            post.addEventListener('click', function(e) {
+                // Prevent redirection if clicking on a button
+                if (e.target.closest('.btn-icon')) {
+                    e.stopPropagation();
+                    return;
+                }
+                // Redirect to post page
+                const postId = this.getAttribute('data-id');
+                window.location.href = `/post/${postId}`;
+            });
+        });
+
+        // Add click event to "View Post" buttons on comments
+        const viewPostButtons = document.querySelectorAll('.btn-view-post');
+        viewPostButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const postId = this.closest('.comment').getAttribute('data-post-id');
+                window.location.href = `/post/${postId}`;
+            });
+        });
+    });
+</script>

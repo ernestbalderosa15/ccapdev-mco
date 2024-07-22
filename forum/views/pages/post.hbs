@@ -1,0 +1,129 @@
+{{!-- pages/post.hbs --}}
+
+<article class="post full-post" data-post-id="{{post._id}}">
+<div class="post full-post">
+   <div class="post-header">
+        <div class="post-user">
+            <img src="{{post.user.avatar}}" alt="{{post.user.username}}" class="avatar small">
+            <span class="username">{{post.user.username}}</span>
+            <span class="time">{{formatDate post.createdAt}}</span>
+        </div>
+        <div class="post-actions">
+            <button class="post-menu"><span class="material-icons">more_vert</span></button>
+            <div class="post-menu-content">
+                {{#if (eq ../user._id this.user._id)}}
+                    <a href="#" class="edit-post" data-post-id="{{this._id}}">Edit</a>
+                    <a href="#" class="delete-post" data-post-id="{{this._id}}">Delete</a>
+                {{/if}}
+                <a href="#" class="share-post" data-post-id="{{this._id}}">Share</a>
+            </div>
+        </div>
+    </div>
+    <h2 class="post-title">{{post.title}}</h2>
+    {{#if post.image}}
+    <img src="{{post.image}}" alt="Post image" class="post-image">
+    {{/if}}
+    <div class="post-content">
+        {{{post.content}}}
+    </div>
+    <div class="post-tags">
+        {{#each post.tags}}
+        <span class="tag">{{this}}</span>
+        {{/each}}
+    </div>
+    <div class="post-stats">
+        <div class="post-stats-left">
+            <button class="btn-icon upvote-btn" data-post-id="{{this._id}}">
+                <span class="material-icons">arrow_upward</span> 
+                <span class="upvote-count">{{this.upvotes.length}}</span>
+            </button>
+            <button class="btn-icon downvote-btn" data-post-id="{{this._id}}">
+                <span class="material-icons">arrow_downward</span>
+            </button>
+            <button class="btn-icon">
+                <span class="material-icons">comment</span> 
+                {{this.comments.length}}
+            </button>
+        </div>
+        <div class="post-stats-right">
+            <button class="btn-icon bookmark-btn" data-post-id="{{post._id}}">
+                <span class="material-icons">bookmark</span>
+            </button>
+            <button class="btn-icon share-btn" data-post-id="{{post._id}}">
+                <span class="material-icons">share</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="comments-section">
+        <h3>Comments</h3>
+        <div class="comment-form-container">
+            <textarea placeholder="Write a comment..." class="comment-input"></textarea>
+            <button type="submit" class="btn-icon btn-add-comment" data-post-id="{{post._id}}">
+                <span class="material-icons">add</span>
+            </button>
+        </div>
+
+        <div class="comments-list">
+            {{#each post.comments}}
+            <div class="comment">
+                <div class="comment-header">
+                    <div class="comment-user-info">
+                        <img src="{{this.user.avatar}}" alt="{{this.user.username}}" class="avatar small">
+                        <span class="username">{{this.user.username}}</span>
+                        <span class="time">{{formatDate this.createdAt}}</span>
+                    </div>
+                    <div class="comment-actions">
+                        <button class="comment-menu"><span class="material-icons">more_vert</span></button>
+                        <div class="comment-menu-content">
+                                    {{#if (eq ../../user._id this.user._id)}}
+                                        <a href="#" class="edit-comment" data-comment-id="{{this._id}}">Edit</a>
+                                        <a href="#" class="delete-comment" data-comment-id="{{this._id}}">Delete</a>
+                                    {{/if}}
+                            <a href="#" class="bookmark-comment" data-comment-id="{{this._id}}">Bookmark</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="comment-content">
+                    {{{this.content}}}
+                </div>
+                <button class="btn-reply" data-comment-id="{{this._id}}">
+                    <span class="material-icons">reply</span>
+                    Reply
+                </button>
+                {{#if this.replies}}
+                <div class="nested-comments">
+                    {{#each this.replies}}
+                    <div class="comment nested">
+                        <div class="comment-header">
+                            <div class="comment-user-info">
+                                <img src="{{this.user.avatar}}" alt="{{this.user.username}}" class="avatar small">
+                                <span class="username">{{this.user.username}}</span>
+                                <span class="time">{{formatDate this.createdAt}}</span>
+                            </div>
+                            <div class="comment-actions">
+                                <button class="comment-menu"><span class="material-icons">more_vert</span></button>
+                                <div class="comment-menu-content">
+                                    <a href="#" class="edit-comment" data-comment-id="{{this._id}}">Edit</a>
+                                    <a href="#" class="share-comment" data-comment-id="{{this._id}}">Share</a>
+                                    <a href="#" class="bookmark-comment" data-comment-id="{{this._id}}">Bookmark</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="comment-content">
+                            {{{this.content}}}
+                        </div>
+                        <button class="btn-reply" data-comment-id="{{this._id}}">
+                            <span class="material-icons">reply</span>
+                            Reply
+                        </button>
+                    </div>
+                    {{/each}}
+                </div>
+                {{/if}}
+            </div>
+            {{/each}}
+        </div>
+    </div>
+</div>
+</article>

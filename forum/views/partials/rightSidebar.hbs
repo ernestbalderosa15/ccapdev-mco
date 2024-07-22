@@ -1,0 +1,17 @@
+{{!-- partials/rightSidebar.hbs --}}
+
+<aside class="right-column">
+    <div class="profile-box">
+        <img src="{{user.profilePicture}}" alt="{{user.username}}" class="avatar">
+        <h3>{{user.username}}</h3>
+        <p>Posts: {{user.postCount}}</p>
+    </div>
+    <div class="tags-box">
+        <h3>My Tags</h3>
+        <div class="tags-list">
+            {{#each user.savedTags}}
+                <span class="tag">{{this}}</span>
+            {{/each}}
+        </div>
+    </div>
+</aside>

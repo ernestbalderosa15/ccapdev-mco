@@ -1,0 +1,42 @@
+{{!-- pages/saved-pages.hbs --}}
+
+<div class="saved-pages">
+{{#each posts}}
+<article class="post">
+    <div class="post-header">
+        <div class="post-user">
+            <img src="https://i.pravatar.cc/150?img={{this.avatarId}}" alt="{{this.user}}" class="avatar small">
+            <span class="username">{{this.user}}</span>
+            <span class="time">{{this.time}}</span>
+        </div>
+        <div class="post-actions">
+            <button class="post-menu"><span class="material-icons">more_vert</span></button>
+            <div class="post-menu-content">
+                <a href="#" class="edit-post" data-post-id="{{post.id}}">Edit</a>                        <a href="#" class="share-comment">Share</a>
+                <a href="#">Delete</a>
+            </div>
+        </div>
+    </div>
+    <h2 class="post-title">{{this.title}}</h2>
+    {{#if this.image}}
+    <img src="{{this.image}}" alt="Post image" class="post-image">
+    {{/if}}
+    <div class="post-tags">
+        {{#each this.tags}}
+        <span class="tag">{{this}}</span>
+        {{/each}}
+    </div>
+    <div class="post-stats">
+        <div class="post-stats-left">
+            <button class="btn-icon"><span class="material-icons">arrow_upward</span> {{this.upvotes}}</button>
+            <button class="btn-icon"><span class="material-icons">arrow_downward</span></button>
+            <button class="btn-icon"><span class="material-icons">comment</span> {{this.comments}}</button>
+        </div>
+        <div class="post-stats-right">
+            <button class="btn-icon saved"><span class="material-icons" style="color: var(--primary-color);">bookmark</span></button>
+            <button class="btn-icon"><span class="material-icons">share</span></button>
+        </div>
+    </div>
+</article>
+    {{/each}}
+</div>

@@ -1,0 +1,91 @@
+{{!-- pages/home.hbs --}}
+
+<div id="posts-container">
+    {{#each posts}}
+    <article class="post" data-post-id="{{this._id}}">
+        <div class="post-header">
+            <div class="post-user">
+                <img src="{{this.user.avatar}}" alt="{{this.user.username}}" class="avatar small">
+                <span class="username">{{this.user.username}}</span>
+                <span class="time">{{formatDate this.createdAt}}</span>
+            </div>
+        </div>
+        <h2 class="post-title">{{this.title}}</h2>
+        <div class="post-content-preview">
+            {{truncate this.content 150}}
+        </div>
+        {{#if this.image}}
+        <img src="{{this.image}}" alt="Post image" class="post-image">
+        {{/if}}
+        <div class="post-stats">
+            <span>Upvotes: {{this.upvotes.length}}</span>
+            <span>Comments: {{this.comments.length}}</span>
+        </div>
+    </article>
+    {{/each}}
+</div>
+
+{{#if isLoggedIn}}
+<div id="loading" style="display: none;">Loading more posts...</div>
+{{/if}}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const isLoggedIn = {{isLoggedIn}};
+    let page = 1;
+    let loading = false;
+
+    function loadMorePosts() {
+        if (loading) return;
+        loading = true;
+        document.getElementById('loading').style.display = 'block';
+
+        fetch(`/api/posts?page=${page + 1}`)
+            .then(response => response.json())
+            .then(newPosts => {
+                if (newPosts.length > 0) {
+                    const container = document.getElementById('posts-container');
+                    newPosts.forEach(post => {
+                        const postElement = document.createElement('article');
+                        postElement.className = 'post';
+                        postElement.innerHTML = `
+                            <div class="post-header">
+                                <div class="post-user">
+                                    <img src="${post.user.avatar}" alt="${post.user.username}" class="avatar small">
+                                    <span class="username">${post.user.username}</span>
+                                    <span class="time">${new Date(post.createdAt).toLocaleString()}</span>
+                                </div>
+                            </div>
+                            <h2 class="post-title">${post.title}</h2>
+                            <div class="post-content-preview">
+                                ${post.content.substring(0, 150)}...
+                            </div>
+                            ${post.image ? `<img src="${post.image}" alt="Post image" class="post-image">` : ''}
+                            <div class="post-stats">
+                                <span>Upvotes: ${post.upvotes.length}</span>
+                                <span>Comments: ${post.comments.length}</span>
+                            </div>
+                        `;
+                        container.appendChild(postElement);
+                    });
+                    page++;
+                }
+                loading = false;
+                document.getElementById('loading').style.display = 'none';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                loading = false;
+                document.getElementById('loading').style.display = 'none';
+            });
+    }
+
+    if (isLoggedIn) {
+        window.addEventListener('scroll', () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
+                loadMorePosts();
+            }
+        });
+    }
+});
+</script>

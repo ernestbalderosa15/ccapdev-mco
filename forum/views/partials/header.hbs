@@ -1,0 +1,35 @@
+{{!-- partials/home.hbs --}}
+
+<header>
+    <div class="container">
+        <div class="logo">
+            <a href="/">The Forum</a>
+        </div>
+        <div class="search-bar">
+            <input type="text" placeholder="Search...">
+            <span class="material-icons search-icon">search</span>
+        </div>
+        <div class="user-actions">
+            {{#if user}} 
+                <a href="/create-post" class="btn-create-post">
+                    <span class="material-icons">add</span> Create Post
+                </a>
+                <a href="#" class="icon-link"><span class="material-icons">mail</span></a>
+                <a href="#" class="icon-link"><span class="material-icons">notifications</span></a>
+                <div class="profile-dropdown">
+                    <img src="{{user.avatarId}}" alt="{{user.name}}" class="avatar">
+                    <span class="material-icons">arrow_drop_down</span>
+                    <div class="profile-dropdown-content">
+                        <a href="/profile">View Profile</a>
+                        <a href="/settings">Settings</a>
+                        <a href="/about">About</a>
+                        <a href="/logout" class="logout-link">Logout</a>
+                    </div>
+                </div>
+            {{else}}
+                <a href="/login" class="btn-login">Login</a>
+                <a href="/signup" class="btn-signup">Sign Up</a>
+            {{/if}}
+        </div>
+    </div>
+</header>

@@ -1,0 +1,98 @@
+<body class="auth-page">
+    <div class="auth-container">
+        <h2>Create Your Account</h2>
+        <form id="signup-form" class="auth-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="confirm-password">Confirm Password</label>
+                <input type="password" id="confirm-password" name="confirmPassword" required class="form-input">
+            </div>
+            <div id="message" class="message"></div>
+            <button type="submit" class="btn-primary">Sign Up</button>
+        </form>
+        <p class="auth-redirect">Already have an account? <a href="/login">Log in</a></p>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const signupForm = document.getElementById('signup-form');
+    const usernameInput = document.getElementById('username');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirm-password');
+    const messageElement = document.getElementById('message');
+
+    signupForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        if (!validateInputs()) return;
+
+        try {
+            const response = await fetch('/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: usernameInput.value.trim(),
+                    email: emailInput.value.trim(),
+                    password: passwordInput.value,
+                    confirmPassword: confirmPasswordInput.value
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                displayMessage('Signup successful! Please log in.', 'success');
+                setTimeout(() => window.location.href = '/login', 2000);
+            } else {
+                displayMessage(data.message || 'Signup failed. Please try again.', 'error');
+            }
+        } catch (error) {
+            console.error('Signup error:', error);
+            displayMessage('An error occurred. Please try again.', 'error');
+        }
+    });
+
+    function validateInputs() {
+        if (!usernameInput.value.trim()) {
+            displayMessage('Username is required', 'error');
+            return false;
+        }
+        if (!emailInput.value.trim() || !isValidEmail(emailInput.value)) {
+            displayMessage('Valid email is required', 'error');
+            return false;
+        }
+        if (passwordInput.value.length < 8) {
+            displayMessage('Password must be at least 8 characters long', 'error');
+            return false;
+        }
+        if (passwordInput.value !== confirmPasswordInput.value) {
+            displayMessage('Passwords do not match', 'error');
+            return false;
+        }
+        return true;
+    }
+
+    function isValidEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    function displayMessage(message, type) {
+        messageElement.textContent = message;
+        messageElement.className = type === 'error' ? 'error-message' : 'success-message';
+        messageElement.style.display = 'block';
+    }
+});
+</script>
+</body>

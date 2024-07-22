@@ -1,0 +1,135 @@
+{{!-- pages/settings.hbs --}}
+
+<div class="post create-post-form">
+    <div class="back-link">
+        <a href="/" class="btn-icon"><span class="material-icons">arrow_back</span> Back to Home</a>
+    </div>
+    <h2 class="post-title">Edit Profile</h2>
+    <form id="settingsForm" class="settings-form" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" value="{{user.username}}" class="form-input">
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" value="{{user.email}}" class="form-input">
+        </div>
+        <div class="form-group">
+            <label for="country">Country</label>
+            <input type="text" id="country" name="country" value="{{user.country}}" class="form-input">
+        </div>
+        <div class="form-group">
+            <label for="profile-picture">Profile Picture</label>
+            <input type="file" id="profile-picture" name="profilePicture" class="form-input" accept="image/*">
+            <img id="profile-picture-preview" src="{{user.profilePicture}}" alt="Profile Picture Preview" style="max-width: 200px; margin-top: 10px;">
+        </div>
+        <div class="form-group">
+            <label for="about-me">About Me</label>
+            <textarea id="about-me" name="aboutMe" class="form-input">{{user.aboutMe}}</textarea>
+        </div>
+        <div class="form-group">
+            <label for="user-tags">My Tags</label>
+            <div id="user-tags-container" class="tags-container">
+                {{#each user.savedTags}}
+                    <span class="tag" data-tag="{{this}}">
+                        {{this}}
+                        <span class="material-icons remove-tag">close</span>
+                    </span>
+                {{/each}}
+            </div>
+            <input type="text" id="user-tags" name="user-tags" class="form-input" placeholder="Add a new tag and press Enter">
+        </div>
+        <div class="form-group">
+            <label for="current-password">Current Password</label>
+            <input type="password" id="current-password" name="currentPassword" class="form-input">
+        </div>
+        <div class="form-group">
+            <label for="new-password">New Password</label>
+            <input type="password" id="new-password" name="newPassword" class="form-input">
+        </div>
+        <div class="form-group">
+            <label for="confirm-new-password">Confirm New Password</label>
+            <input type="password" id="confirm-new-password" name="confirmNewPassword" class="form-input">
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">Save Changes</button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const settingsForm = document.getElementById('settingsForm');
+    const profilePictureInput = document.getElementById('profile-picture');
+    const profilePicturePreview = document.getElementById('profile-picture-preview');
+    const tagInput = document.getElementById('user-tags');
+    const tagsContainer = document.getElementById('user-tags-container');
+
+    // Preview profile picture
+    profilePictureInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                profilePicturePreview.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Handle tag input
+    tagInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const tag = this.value.trim();
+            if (tag) {
+                addTag(tag);
+                this.value = '';
+            }
+        }
+    });
+
+    // Remove tag
+    tagsContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-tag')) {
+            e.target.parentElement.remove();
+        }
+    });
+
+    // Add tag function
+    function addTag(tag) {
+        const tagElement = document.createElement('span');
+        tagElement.classList.add('tag');
+        tagElement.dataset.tag = tag;
+        tagElement.innerHTML = `${tag} <span class="material-icons remove-tag">close</span>`;
+        tagsContainer.appendChild(tagElement);
+    }
+
+    // Form submission
+    settingsForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+
+        // Add tags to formData
+        const tags = Array.from(tagsContainer.children).map(tag => tag.dataset.tag);
+        formData.append('tags', JSON.stringify(tags));
+
+        try {
+            const response = await fetch('/profile/update', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) throw new Error('Failed to update profile');
+
+            const result = await response.json();
+            alert('Profile updated successfully!');
+            // Optionally, redirect to profile page or refresh the current page
+            // window.location.href = '/profile';
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to update profile. Please try again.');
+        }
+    });
+});
+</script>
