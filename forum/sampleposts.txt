@@ -1,0 +1,79 @@
+[
+  {
+    "_id": {"$oid": "60d5ecb74f86a1e8e2d8f2b1"},
+    "user": {"$oid": "60d5ecb74f86a1e8e2d8f1a1"},
+    "title": "10 Essential JavaScript Concepts Every Developer Should Know",
+    "content": "In this post, we'll explore 10 fundamental JavaScript concepts that are crucial for every developer to master. From closures to promises, we've got you covered!",
+    "image": "https://thumbor.forbes.com/thumbor/fit-in/900x510/https://www.forbes.com/advisor/wp-content/uploads/2023/06/person-at-computer.jpeg.jpg",
+    "tags": ["programming", "javascript", "webdev"],
+    "upvotes": [
+      {"$oid": "60d5ecb74f86a1e8e2d8f1a2"},
+      {"$oid": "60d5ecb74f86a1e8e2d8f1a3"}
+    ],
+    "downvotes": [
+      {"$oid": "60d5ecb74f86a1e8e2d8f1a4"}
+    ],
+    "comments": [
+      {"$oid": "60d5ecb74f86a1e8e2d8f3b1"},
+      {"$oid": "60d5ecb74f86a1e8e2d8f3b2"}
+    ],
+    "createdAt": {"$date": "2023-07-11T00:00:00Z"},
+    "updatedAt": {"$date": "2023-07-11T00:00:00Z"}
+  },
+  {
+    "_id": {"$oid": "60d5ecb74f86a1e8e2d8f2b2"},
+    "user": {"$oid": "60d5ecb74f86a1e8e2d8f1a2"},
+    "title": "Hidden Gems: 5 Underrated Travel Destinations in Europe",
+    "content": "Discover these 5 beautiful and less-crowded European destinations that are perfect for your next adventure!",
+    "image": "https://visasassociation.com/wp-content/uploads/2023/02/reasons-you-should-travel-to-europe-1-800x400.jpg",
+    "tags": ["travel", "europe", "adventure"],
+    "upvotes": [
+      {"$oid": "60d5ecb74f86a1e8e2d8f1a1"},
+      {"$oid": "60d5ecb74f86a1e8e2d8f1a5"}
+    ],
+    "downvotes": [],
+    "comments": [
+      {"$oid": "60d5ecb74f86a1e8e2d8f3b3"}
+    ],
+    "createdAt": {"$date": "2023-07-12T00:00:00Z"},
+    "updatedAt": {"$date": "2023-07-12T00:00:00Z"}
+  },
+  {
+    "_id": {"$oid": "60d5ecb74f86a1e8e2d8f2b3"},
+    "user": {"$oid": "60d5ecb74f86a1e8e2d8f1a3"},
+    "title": "The Ultimate Guide to Making Perfect Homemade Pizza",
+    "content": "Learn the secrets to creating restaurant-quality pizza right in your own kitchen. From dough to toppings, we've got all the tips you need!",
+    "image": "https://www.allrecipes.com/thmb/9UTj7kZBJDqory0cdEv_bw6Ef_0=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/48727-Mikes-homemade-pizza-DDMFS-beauty-2x1-BG-2976-d5926c9253d3486bbb8a985172604291.jpg",
+    "tags": ["food", "cooking", "recipe"],
+    "upvotes": [
+      {"$oid": "60d5ecb74f86a1e8e2d8f1a4"},
+      {"$oid": "60d5ecb74f86a1e8e2d8f1a6"},
+      {"$oid": "60d5ecb74f86a1e8e2d8f1a7"}
+    ],
+    "downvotes": [
+      {"$oid": "60d5ecb74f86a1e8e2d8f1a8"}
+    ],
+    "comments": [
+      {"$oid": "60d5ecb74f86a1e8e2d8f3b4"},
+      {"$oid": "60d5ecb74f86a1e8e2d8f3b5"}
+    ],
+    "createdAt": {"$date": "2023-07-13T00:00:00Z"},
+    "updatedAt": {"$date": "2023-07-13T00:00:00Z"}
+  },
+  {
+    "_id": {"$oid": "60d5ecb74f86a1e8e2d8f2b4"},
+    "user": {"$oid": "60d5ecb74f86a1e8e2d8f1a4"},
+    "title": "5 Simple Ways to Reduce Your Carbon Footprint",
+    "content": "Discover easy and effective methods to minimize your environmental impact and contribute to a healthier planet.",
+    "image": "https://tracextech.com/wp-content/uploads/2023/09/carbon-footprint.png",
+    "tags": ["environment", "sustainability", "eco-friendly"],
+    "upvotes": [
+      {"$oid": "60d5ecb74f86a1e8e2d8f1a2"},
+      {"$oid": "60d5ecb74f86a1e8e2d8f1a9"}
+    ],
+    "downvotes": [],
+    "comments": [],
+    "createdAt": {"$date": "2023-07-14T00:00:00Z"},
+    "updatedAt": {"$date": "2023-07-14T00:00:00Z"}
+  }
+]

@@ -10,16 +10,35 @@
                 <span class="time">{{formatDate this.createdAt}}</span>
             </div>
         </div>
-        <h2 class="post-title">{{this.title}}</h2>
+        <h2 class="post-title"><a href="/post/{{this._id}}">{{this.title}}</a></h2>
         <div class="post-content-preview">
-            {{truncate this.content 150}}
+            {{{truncateHtml this.content 150}}}
         </div>
         {{#if this.image}}
         <img src="{{this.image}}" alt="Post image" class="post-image">
         {{/if}}
         <div class="post-stats">
-            <span>Upvotes: {{this.upvotes.length}}</span>
-            <span>Comments: {{this.comments.length}}</span>
+            <div class="post-stats-left">
+                <button class="btn-icon upvote-btn" data-post-id="{{this._id}}">
+                    <span class="material-icons">arrow_upward</span> 
+                    <span class="upvote-count">{{this.upvotes.length}}</span>
+                </button>
+                <button class="btn-icon downvote-btn" data-post-id="{{this._id}}">
+                    <span class="material-icons">arrow_downward</span>
+                </button>
+                <button class="btn-icon">
+                    <span class="material-icons">comment</span> 
+                    {{this.comments.length}}
+                </button>
+            </div>
+            <div class="post-stats-right">
+                <button class="btn-icon bookmark-btn" data-post-id="{{this._id}}">
+                    <span class="material-icons">bookmark</span>
+                </button>
+                <button class="btn-icon share-btn" data-post-id="{{this._id}}">
+                    <span class="material-icons">share</span>
+                </button>
+            </div>
         </div>
     </article>
     {{/each}}
@@ -35,6 +54,16 @@ document.addEventListener('DOMContentLoaded', function() {
     let page = 1;
     let loading = false;
 
+    // Add click event listeners to post containers
+    const postTitles = document.querySelectorAll('.post-title a');
+    postTitles.forEach(title => {
+        title.addEventListener('click', function(e) {
+            e.preventDefault();
+            const postId = this.closest('.post').getAttribute('data-post-id');
+            window.location.href = `/post/${postId}`;
+        });
+    });
+
     function loadMorePosts() {
         if (loading) return;
         loading = true;
@@ -48,6 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     newPosts.forEach(post => {
                         const postElement = document.createElement('article');
                         postElement.className = 'post';
+                        postElement.setAttribute('data-post-id', post._id);
                         postElement.innerHTML = `
                             <div class="post-header">
                                 <div class="post-user">
@@ -67,6 +97,13 @@ document.addEventListener('DOMContentLoaded', function() {
                             </div>
                         `;
                         container.appendChild(postElement);
+                        
+                        // Add click event listener to the new post
+                        postElement.addEventListener('click', function(e) {
+                            if (!e.target.closest('button')) {
+                                window.location.href = `/post/${post._id}`;
+                            }
+                        });
                     });
                     page++;
                 }
@@ -89,3 +126,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+

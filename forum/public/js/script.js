@@ -2,71 +2,83 @@
      js/script.js
 */
 
-// CKEditor
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize CKEditor
+    // Initialize comments functionality if comments list exists
+    if (document.querySelector('.comments-list')) {
+        initializeComments();
+    }
+
+    // Initialize navigation bar
+    initializeNavigation();
+
+    // Initialize tags for user settings if the container exists
+    if (document.getElementById('user-tags-container')) {
+        initializeUserTags();
+    }
+
+    // Initialize CKEditor for About Me if the element exists
+    if (document.getElementById('about-me')) {
+        initializeAboutMeEditor();
+    }
+});
+
+function initializeCreatePostPage() {
+    let editor;
+
     ClassicEditor
         .create(document.querySelector('#editor'), {
-            toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote', 'insertTable', 'imageUpload', 'undo', 'redo'],
-            image: {
-                toolbar: ['imageTextAlternative', '|', 'imageStyle:alignLeft', 'imageStyle:full', 'imageStyle:alignRight'],
-                styles: [
-                    'full',
-                    'alignLeft',
-                    'alignRight',
-                ],
-                upload: {
-                    types: ['jpeg', 'png', 'gif', 'bmp', 'webp', 'tiff']
-                },
-            },
-            simpleUpload: {
-                uploadUrl: '/upload-image',
-                headers: {
-                    'X-CSRF-TOKEN': 'CSRF-Token',
-                    Authorization: 'Bearer <JSON Web Token>'
-                }
-            }
+            // ... your CKEditor configuration ...
+        })
+        .then(newEditor => {
+            editor = newEditor;
         })
         .catch(error => {
-            console.error(error);
+            console.error('CKEditor initialization error:', error);
         });
-
-    // Handle tag input
-    const tagInput = document.getElementById('post-tags');
-    const tagsContainer = document.getElementById('tags-container');
-    const tags = new Set();
-
-    tagInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            const tag = this.value.trim();
-            if (tag && !tags.has(tag)) {
-                tags.add(tag);
-                const tagElement = document.createElement('span');
-                tagElement.classList.add('tag');
-                tagElement.innerHTML = `${tag} <span class="material-icons">close</span>`;
-                tagElement.querySelector('.material-icons').addEventListener('click', function() {
-                    tags.delete(tag);
-                    tagElement.remove();
-                });
-                tagsContainer.appendChild(tagElement);
-                this.value = '';
-            }
-        }
-    });
 
     // Handle form submission
     document.getElementById('post-form').addEventListener('submit', function(e) {
         e.preventDefault();
+        console.log('Form submitted');
+        
         const title = document.getElementById('post-title').value;
-        const description = document.querySelector('.ck-editor__editable').innerHTML;
-        // Here you would typically send this data to your server
-        console.log({ title, description, tags: Array.from(tags) });
+        const content = editor.getData(); // Get data from CKEditor
+        const tagArray = Array.from(tags);
+        
+        const data = {
+            title: title,
+            content: content,
+            tags: tagArray
+        };
+        
+        fetch('/create-post', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.json().then(data => ({status: response.status, body: data}));
+        })
+        .then(({status, body}) => {
+            console.log('Response body:', body);
+            if (status !== 200) {
+                throw new Error(body.error || 'An error occurred');
+            }
+            // Redirect to the new post page
+            window.location.href = '/post/' + body._id;
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            document.getElementById('error-message').textContent = 'Error: ' + (error.message || 'An unknown error occurred. Please try again.');
+        });
     });
-});
 
-// Comments
-document.addEventListener('DOMContentLoaded', function() {
+    // ... rest of your initializeCreatePostPage function ...
+}
+function initializeComments() {
     const commentsList = document.querySelector('.comments-list');
 
     commentsList.addEventListener('click', function(e) {
@@ -190,96 +202,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
         return form;
     }
-});
+}
 
-// Fetch Posts
-document.addEventListener('DOMContentLoaded', function() {
-    const editButtons = document.querySelectorAll('.edit-post');
-    const postForm = document.getElementById('post-form');
-    let isEditing = false;
-    let editingPostId = null;
-
-    editButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-            const postId = this.dataset.postId;
-            editingPostId = postId;
-            isEditing = true;
-            fetchPostData(postId);
-        });
-    });
-
-    function fetchPostData(postId) {
-        fetch(`/api/posts/${postId}`)
-            .then(response => response.json())
-            .then(data => {
-                populateForm(data);
-            })
-            .catch(error => console.error('Error:', error));
-    }
-
-    function populateForm(data) {
-        document.getElementById('post-title').value = data.title;
-        document.getElementById('editor').value = data.content;
-        // Populate tags
-        const tagsContainer = document.getElementById('tags-container');
-        tagsContainer.innerHTML = '';
-        data.tags.forEach(tag => addTag(tag));
-        
-        // Change form title and button text
-        document.querySelector('.post-title').textContent = 'Edit Post';
-        document.querySelector('.btn-primary').textContent = 'Update Post';
-    }
-
-    postForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const formData = new FormData(this);
-        const url = isEditing ? `/api/posts/${editingPostId}` : '/api/posts';
-        const method = isEditing ? 'PUT' : 'POST';
-
-        fetch(url, {
-            method: method,
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Handle success (e.g., show a success message, redirect)
-            window.location.href = `/post/${data.id}`;
-        })
-        .catch(error => console.error('Error:', error));
-    });
-});
-
-// Navigation bar active when clicked
-document.addEventListener('DOMContentLoaded', function() {
+function initializeNavigation() {
     const sidebarLinks = document.querySelectorAll('.left-column nav ul li a');
     
     sidebarLinks.forEach(link => {
         link.addEventListener('click', function(e) {
-            // Remove active class from all links
             sidebarLinks.forEach(l => l.classList.remove('active'));
-            
-            // Add active class to clicked link
             this.classList.add('active');
-            
-            // If you're using client-side routing, you might want to prevent the default action
-            // e.preventDefault();
-            
-            // You could add your routing logic here
         });
     });
     
-    // Set active class based on current URL
     const currentPath = window.location.pathname;
     sidebarLinks.forEach(link => {
         if (link.getAttribute('href') === currentPath) {
             link.classList.add('active');
         }
     });
-});
+}
 
-// Tags
-document.addEventListener('DOMContentLoaded', function() {
+function initializeUserTags() {
     const tagInput = document.getElementById('user-tags');
     const tagsContainer = document.getElementById('user-tags-container');
     const tags = new Set(Array.from(tagsContainer.querySelectorAll('.tag')).map(tag => tag.dataset.tag));
@@ -305,12 +248,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function addTag(tag) {
-        if (tags.has(tag)) return;
         tags.add(tag);
         const tagElement = document.createElement('span');
         tagElement.classList.add('tag');
-        tagElement.dataset.tag = tag;
-        tagElement.innerHTML = `${tag} <span class="material-icons remove-tag">close</span>`;
+        tagElement.innerHTML = `${tag} <span class="material-icons">close</span>`;
+        tagElement.querySelector('.material-icons').addEventListener('click', function() {
+            tags.delete(tag);
+            tagElement.remove();
+        });
         tagsContainer.appendChild(tagElement);
     }
 
@@ -332,16 +277,16 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => console.error('Error:', error));
     });
+}
 
-    // Initialize CKEditor for About Me
-    if (document.getElementById('about-me')) {
-        ClassicEditor
-            .create(document.getElementById('about-me'), {
-                toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote'],
-                placeholder: 'Tell us about yourself...'
-            })
-            .catch(error => {
-                console.error(error);
-            });
-    }
-});
+function initializeAboutMeEditor() {
+    ClassicEditor
+        .create(document.getElementById('about-me'), {
+            toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote'],
+            placeholder: 'Tell us about yourself...'
+        })
+        .catch(error => {
+            console.error(error);
+        });
+}
+

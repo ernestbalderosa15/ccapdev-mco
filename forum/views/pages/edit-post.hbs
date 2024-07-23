@@ -1,75 +1,58 @@
-{{!-- pages/create-post.hbs --}}
-
-<div class="post create-post-form">
+<div class="post edit-post-form">
     <div class="back-link">
-        <a href="/" class="btn-icon"><span class="material-icons">arrow_back</span> Back</a>
+        <a href="/post/{{post._id}}" class="btn-icon"><span class="material-icons">arrow_back</span> Back</a>
     </div>
-    <h2 class="post-title">Create a Post</h2>
+    <h2 class="post-title">Edit Post</h2>
     <div id="error-message" style="color: red;"></div>
     <form id="post-form">
         <div class="form-group">
             <label for="post-title">Title</label>
-            <input type="text" id="post-title" name="title" class="form-input" required>
+            <input type="text" id="post-title" name="title" class="form-input" value="{{post.title}}" required>
         </div>
         <div class="form-group">
-            <label for="editor">Description</label>
-            <textarea id="editor" name="content"></textarea>
+            <label for="editor">Content</label>
+            <textarea id="editor" name="content">{{{post.content}}}</textarea>
         </div>
         <div class="form-group">
             <label for="post-tags">Tags</label>
             <div class="tag-input-container">
                 <input type="text" id="post-tags" name="tags" class="form-input" placeholder="Enter tags and press Enter">
-                <div id="tags-container" class="tags-list"></div>
+                <div id="tags-container" class="tags-list">
+                    {{#each post.tags}}
+                    <span class="tag">{{this}} <span class="material-icons">close</span></span>
+                    {{/each}}
+                </div>
             </div>
         </div>
         <div class="form-actions">
             <button type="submit" class="btn-primary">
-                <span class="material-icons">send</span> Submit Post
+                <span class="material-icons">save</span> Update Post
             </button>
         </div>
     </form>
 </div>
-
 <script src="https://cdn.ckeditor.com/ckeditor5/27.1.0/classic/ckeditor.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     let editor;
-    const tags = new Set();
-    let isEditorReady = false;
-    const submitButton = document.querySelector('#post-form button[type="submit"]');
-    
-    // Disable submit button initially
-    submitButton.disabled = true;
+    const tags = new Set({{json post.tags}});
 
     ClassicEditor
-    .create(document.querySelector('#editor'), {
-        toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote'],
-        link: {
-            decorators: {
-                openInNewTab: {
-                    mode: 'manual',
-                    label: 'Open in a new tab',
-                    defaultValue: true,
-                    attributes: {
-                        target: '_blank',
-                        rel: 'noopener noreferrer'
-                    }
-                }
-            }
-        }
-    })
-    .then(newEditor => {
-        editor = newEditor;
-        isEditorReady = true;
-        submitButton.disabled = false; // Enable submit button when editor is ready
-    })
-    .catch(error => {
-        console.error('CKEditor initialization error:', error);
-        document.getElementById('error-message').textContent = 'Error initializing editor. Please try refreshing the page.';
-    });
-    
+        .create(document.querySelector('#editor'), {
+            toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote'],
+        })
+        .then(newEditor => {
+            editor = newEditor;
+        })
+        .catch(error => {
+            console.error('CKEditor initialization error:', error);
+        });
+
     const tagInput = document.getElementById('post-tags');
     const tagsContainer = document.getElementById('tags-container');
+
+    // Initialize tags
+    tags.forEach(tag => addTag(tag));
 
     tagInput.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
@@ -97,13 +80,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('post-form').addEventListener('submit', function(e) {
         e.preventDefault();
         
-        if (!isEditorReady) {
-            document.getElementById('error-message').textContent = 'Editor is not ready. Please wait and try again.';
-            return;
-        }
-        
         const title = document.getElementById('post-title').value;
-        const content = editor.getData(); // This should now be safe to call
+        const content = editor.getData();
         const tagArray = Array.from(tags);
         
         const data = {
@@ -112,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
             tags: tagArray
         };
         
-        fetch('/create-post', {
+        fetch('/edit-post/{{post._id}}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -124,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.error) {
                 throw new Error(data.error);
             }
-            // Redirect to the new post page
+            // Redirect to the updated post page
             window.location.href = '/post/' + data._id;
         })
         .catch((error) => {
