@@ -28,20 +28,33 @@ const isAuthenticated = (req, res, next) => {
     }
 };
 
+
 /**
  * Home route - displays recent posts
  * @route GET /
  */
+// Home route
 router.get('/', async (req, res) => {
     try {
         const isLoggedIn = !!req.user;
-        const limit = isLoggedIn ? 0 : 15; // 0 means no limit for logged-in users
+        const limit = isLoggedIn ? 0 : 15;
 
         const posts = await Post.find()
             .populate('user', 'username avatar')
             .populate('comments')
             .sort('-createdAt')
-            .limit(limit);
+            .limit(limit)
+            .lean();
+
+        if (isLoggedIn && req.user._id) {
+            const userId = req.user._id.toString();
+            const userBookmarks = req.user.bookmarkedPosts ? req.user.bookmarkedPosts.map(id => id.toString()) : [];
+            posts.forEach(post => {
+                post.userVote = post.upvotes && post.upvotes.some(id => id.toString() === userId) ? 'upvote' : 
+                                post.downvotes && post.downvotes.some(id => id.toString() === userId) ? 'downvote' : null;
+                post.isBookmarked = userBookmarks.includes(post._id.toString());
+            });
+        }
 
         res.render('pages/home', { 
             title: 'Home', 
@@ -50,38 +63,13 @@ router.get('/', async (req, res) => {
             user: req.user
         });
     } catch (error) {
-        console.error('Error fetching posts for home page:', error);
+        console.error('Error fetching posts:', error);
         res.status(500).render('pages/error', { title: 'Server Error', message: 'Error fetching posts' });
     }
 });
 
 /**
- * API route to fetch posts
- * @route GET /api/posts
- * @param {number} req.query.page - Page number 
- */
-router.get('/api/posts', async (req, res) => {
-    try {
-        const page = Math.max(1, parseInt(req.query.page) || 1);
-        const limit = 15;
-        const skip = (page - 1) * limit;
-
-        const posts = await Post.find()
-            .populate('user', 'username avatar')
-            .populate('comments')
-            .sort('-createdAt')
-            .skip(skip)
-            .limit(limit);
-
-        res.json(posts);
-    } catch (error) {
-        console.error('Error fetching posts for API:', error);
-        res.status(500).json({ error: 'Error fetching posts' });
-    }
-});
-
-/**
- * Retrieves and renders a single post with its comments and author information.
+ * Retrieves and renders a single post
  * 
  * @route GET /post/:id
  * @param {string} req.params.id - The ID of the post to retrieve.
@@ -102,7 +90,7 @@ router.get('/post/:id', async (req, res) => {
                     }
                 ]
             })
-            .populate('upvotes', 'username');
+            .lean();
 
         if (!post) {
             return res.status(404).render('error', { 
@@ -110,6 +98,15 @@ router.get('/post/:id', async (req, res) => {
                 message: 'The requested post could not be found.',
                 user: req.user
             });
+        }
+
+        const isLoggedIn = !!req.user;
+        if (isLoggedIn && req.user._id) {
+            const userId = req.user._id.toString();
+            const userBookmarks = req.user.bookmarkedPosts ? req.user.bookmarkedPosts.map(id => id.toString()) : [];
+            post.userVote = post.upvotes.some(id => id.toString() === userId) ? 'upvote' : 
+                            post.downvotes.some(id => id.toString() === userId) ? 'downvote' : null;
+            post.isBookmarked = userBookmarks.includes(post._id.toString());
         }
 
         const postUserId = post.user._id.toString();
@@ -120,7 +117,8 @@ router.get('/post/:id', async (req, res) => {
             title: post.title, 
             post,
             user: req.user,
-            isAuthor
+            isAuthor,
+            isLoggedIn
         });
     } catch (error) {
         console.error('Error fetching post:', error);
@@ -143,10 +141,33 @@ router.get('/my-interests', isAuthenticated, (req, res) => {
 /**
  * Saved Pages route
  */
-router.get('/saved', isAuthenticated, (req, res) => {
-    res.render('saved', { title: 'Saved Pages', user: req.user });
-});
+router.get('/saved', isAuthenticated, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id)
+            .populate({
+                path: 'bookmarkedPosts',
+                populate: { path: 'user', select: 'username avatar' }
+            })
+            .lean();
 
+        const posts = user.bookmarkedPosts.map(post => ({
+            ...post,
+            isBookmarked: true,
+            userVote: post.upvotes.some(id => id.toString() === req.user._id.toString()) ? 'upvote' : 
+                      post.downvotes.some(id => id.toString() === req.user._id.toString()) ? 'downvote' : null
+        }));
+
+        res.render('saved-pages', { 
+            title: 'Saved Posts',
+            posts, 
+            user: req.user,
+            isLoggedIn: true
+        });
+    } catch (error) {
+        console.error('Error fetching saved posts:', error);
+        res.status(500).render('error', { message: 'Error fetching saved posts' });
+    }
+});
 /**
  * Profile route
  * @route GET /profile/:username?
@@ -291,5 +312,174 @@ router.delete('/delete-post/:id', authMiddleware, async (req, res) => {
     }
 });
 
+// Upvote a post
+router.post('/post/:id/upvote', authMiddleware, async (req, res) => {
+    try {
+        const post = await Post.findById(req.params.id);
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        const userId = req.user._id;
+        const hasUpvoted = post.upvotes.includes(userId);
+        const hasDownvoted = post.downvotes.includes(userId);
+
+        if (hasUpvoted) {
+            // Remove upvote
+            post.upvotes.pull(userId);
+        } else {
+            // Add upvote
+            post.upvotes.addToSet(userId);
+            // Remove downvote if exists
+            if (hasDownvoted) {
+                post.downvotes.pull(userId);
+            }
+        }
+
+        await post.save();
+        res.json({ 
+            upvotes: post.upvotes.length, 
+            downvotes: post.downvotes.length,
+            userVote: hasUpvoted ? null : 'upvote'
+        });
+    } catch (error) {
+        console.error('Error upvoting post:', error);
+        res.status(500).json({ error: 'Error upvoting post' });
+    }
+});
+
+// Downvote a post
+router.post('/post/:id/downvote', authMiddleware, async (req, res) => {
+    try {
+        const post = await Post.findById(req.params.id);
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        const userId = req.user._id;
+        const hasUpvoted = post.upvotes.includes(userId);
+        const hasDownvoted = post.downvotes.includes(userId);
+
+        if (hasDownvoted) {
+            // Remove downvote
+            post.downvotes.pull(userId);
+        } else {
+            // Add downvote
+            post.downvotes.addToSet(userId);
+            // Remove upvote if exists
+            if (hasUpvoted) {
+                post.upvotes.pull(userId);
+            }
+        }
+
+        await post.save();
+        res.json({ 
+            upvotes: post.upvotes.length, 
+            downvotes: post.downvotes.length,
+            userVote: hasDownvoted ? null : 'downvote'
+        });
+    } catch (error) {
+        console.error('Error downvoting post:', error);
+        res.status(500).json({ error: 'Error downvoting post' });
+    }
+});
+
+// Book a post
+router.post('/post/:id/bookmark', isAuthenticated, async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const userId = req.user._id;
+
+        const user = await User.findById(userId);
+        const isBookmarked = user.bookmarkedPosts.includes(postId);
+
+        if (isBookmarked) {
+            // Remove bookmark
+            user.bookmarkedPosts.pull(postId);
+        } else {
+            // Add bookmark
+            user.bookmarkedPosts.push(postId);
+        }
+
+        await user.save();
+
+        res.json({ 
+            isBookmarked: !isBookmarked,
+            message: isBookmarked ? 'Post unbookmarked' : 'Post bookmarked'
+        });
+    } catch (error) {
+        console.error('Error bookmarking post:', error);
+        res.status(500).json({ error: 'Error bookmarking post' });
+    }
+});
+
+/**
+ * Trending route - displays posts sorted by upvotes
+ * @route GET /trending
+ */
+router.get('/trending', async (req, res) => {
+    try {
+        const isLoggedIn = !!req.user;
+
+        const posts = await Post.aggregate([
+            {
+                $addFields: {
+                    upvoteCount: { $size: { $ifNull: ["$upvotes", []] } }
+                }
+            },
+            { $sort: { upvoteCount: -1, createdAt: -1 } }
+        ]).exec();
+
+        const populatedPosts = await Post.populate(posts, [
+            { path: 'user', select: 'username avatar' },
+            { path: 'comments' }
+        ]);
+
+        if (isLoggedIn && req.user._id) {
+            const userId = req.user._id.toString();
+            const userBookmarks = req.user.bookmarkedPosts ? req.user.bookmarkedPosts.map(id => id.toString()) : [];
+            populatedPosts.forEach(post => {
+                post.userVote = (post.upvotes && post.upvotes.some(id => id.toString() === userId)) ? 'upvote' : 
+                                (post.downvotes && post.downvotes.some(id => id.toString() === userId)) ? 'downvote' : null;
+                post.isBookmarked = userBookmarks.includes(post._id.toString());
+            });
+        }
+
+        res.render('pages/trending', { 
+            title: 'Trending', 
+            posts: populatedPosts,
+            isLoggedIn,
+            user: req.user
+        });
+    } catch (error) {
+        console.error('Error fetching trending posts:', error);
+        res.status(500).render('pages/error', { title: 'Server Error', message: 'Error fetching trending posts' });
+    }
+});
+
+/**
+ * API route to fetch trending posts
+ * @route GET /api/trending
+ * @param {number} req.query.page - Page number 
+ */
+router.get('/api/trending', async (req, res) => {
+    try {
+        const page = Math.max(1, parseInt(req.query.page) || 1);
+        const limit = 15;
+        const skip = (page - 1) * limit;
+
+        const posts = await Post.find()
+            .populate('user', 'username avatar')
+            .populate('comments')
+            .sort('-upvotes.length') // Sort by number of upvotes in descending order
+            .skip(skip)
+            .limit(limit);
+
+        res.json(posts);
+    } catch (error) {
+        console.error('Error fetching trending posts for API:', error);
+        res.status(500).json({ error: 'Error fetching trending posts' });
+    }
+});
 
 module.exports = router;

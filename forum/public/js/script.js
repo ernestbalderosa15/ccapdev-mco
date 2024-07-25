@@ -2,7 +2,13 @@
      js/script.js
 */
 
+let isLoggedIn = false;
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Get the login state
+    const postElement = document.querySelector('.post.full-post');
+    isLoggedIn = document.body.dataset.userLoggedIn === 'true';
+
     // Initialize comments functionality if comments list exists
     if (document.querySelector('.comments-list')) {
         initializeComments();
@@ -20,14 +26,22 @@ document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('about-me')) {
         initializeAboutMeEditor();
     }
+
+    // Initialize voting functionality
+    initializeVoting();
+
+    initializeBookmarking();
+
+    initializeCommentActions();
 });
+
 
 function initializeCreatePostPage() {
     let editor;
 
     ClassicEditor
         .create(document.querySelector('#editor'), {
-            // ... your CKEditor configuration ...
+            // CKEditor configuration
         })
         .then(newEditor => {
             editor = newEditor;
@@ -75,9 +89,8 @@ function initializeCreatePostPage() {
             document.getElementById('error-message').textContent = 'Error: ' + (error.message || 'An unknown error occurred. Please try again.');
         });
     });
-
-    // ... rest of your initializeCreatePostPage function ...
 }
+
 function initializeComments() {
     const commentsList = document.querySelector('.comments-list');
 
@@ -100,6 +113,10 @@ function initializeComments() {
 
         // Reply button functionality
         if (e.target.closest('.btn-reply')) {
+            if (!isLoggedIn) {
+                alert('Please log in to reply.');
+                return;
+            }
             const comment = e.target.closest('.comment');
             const existingForm = comment.querySelector('.reply-form');
             
@@ -134,6 +151,10 @@ function initializeComments() {
     const addCommentBtn = commentForm.querySelector('.btn-add-comment');
 
     addCommentBtn.addEventListener('click', function() {
+        if (!isLoggedIn) {
+            alert('Please log in to comment.');
+            return;
+        }
         const commentText = commentInput.value.trim();
         if (commentText) {
             addComment(commentText);
@@ -290,3 +311,140 @@ function initializeAboutMeEditor() {
         });
 }
 
+function initializeVoting() {
+    const voteContainers = document.querySelectorAll('.post, .full-post');
+    
+    voteContainers.forEach(container => {
+        container.addEventListener('click', function(e) {
+            const voteButton = e.target.closest('.upvote-btn, .downvote-btn');
+            if (!voteButton) return;
+
+            if (!isLoggedIn) {
+                alert('Please log in to vote.');
+                return;
+            }
+
+            const postId = voteButton.dataset.postId;
+            const voteType = voteButton.classList.contains('upvote-btn') ? 'upvote' : 'downvote';
+
+            handleVote(voteButton, postId, voteType);
+        });
+    });
+}
+
+function handleVote(button, postId, voteType) {
+    fetch(`/post/${postId}/${voteType}`, { method: 'POST' })
+        .then(response => {
+            if (response.status === 401) {
+                alert('Please log in to vote.');
+                throw new Error('Not authenticated');
+            }
+            return response.json();
+        })
+        .then(data => {
+            updateVoteUI(button, data);
+            if (window.location.pathname === '/trending') {
+                window.location.reload();
+            }
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+function updateVoteUI(clickedButton, data) {
+    const post = clickedButton.closest('.post, .full-post');
+    const upvoteBtn = post.querySelector('.upvote-btn');
+    const downvoteBtn = post.querySelector('.downvote-btn');
+    const upvoteCount = post.querySelector('.upvote-count');
+    const downvoteCount = post.querySelector('.downvote-count');
+
+    if (upvoteCount) upvoteCount.textContent = data.upvotes;
+    if (downvoteCount) downvoteCount.textContent = data.downvotes;
+
+    upvoteBtn.classList.toggle('active', data.userVote === 'upvote');
+    downvoteBtn.classList.toggle('active', data.userVote === 'downvote');
+
+    // Update the voteScore
+    post.dataset.voteScore = data.upvotes - data.downvotes;
+}
+
+function reorderTrendingPosts() {
+    const postsContainer = document.getElementById('posts-container');
+    const posts = Array.from(postsContainer.children);
+
+    posts.sort((a, b) => {
+        const scoreA = parseInt(a.dataset.voteScore) || 0;
+        const scoreB = parseInt(b.dataset.voteScore) || 0;
+        return scoreB - scoreA;
+    });
+
+    posts.forEach(post => postsContainer.appendChild(post));
+}
+
+function initializeBookmarking() {
+    document.addEventListener('click', function(e) {
+        const bookmarkBtn = e.target.closest('.bookmark-btn');
+        if (!bookmarkBtn) return;
+
+        if (!isLoggedIn) {
+            alert('Please log in to bookmark posts.');
+            return;
+        }
+
+        const postId = bookmarkBtn.dataset.postId;
+        handleBookmark(bookmarkBtn, postId);
+    });
+}
+
+function handleBookmark(button, postId) {
+    fetch(`/post/${postId}/bookmark`, { method: 'POST' })
+        .then(response => {
+            if (response.status === 401) {
+                alert('Please log in to bookmark posts.');
+                throw new Error('Not authenticated');
+            }
+            return response.json();
+        })
+        .then(data => {
+            updateBookmarkUI(button, data.isBookmarked);
+            // If on the saved page and unbookmarking, remove the post
+            if (window.location.pathname === '/saved' && !data.isBookmarked) {
+                const postElement = button.closest('.post');
+                if (postElement) {
+                    postElement.style.opacity = '0';
+                    setTimeout(() => {
+                        postElement.remove();
+                    }, 300);
+                }
+            }
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+function updateBookmarkUI(button, isBookmarked) {
+    button.classList.toggle('active', isBookmarked);
+    const icon = button.querySelector('.material-icons');
+    if (icon) {
+        icon.textContent = isBookmarked ? 'bookmark' : 'bookmark_border';
+    }
+}
+function initializeCommentActions() {
+    const commentsSection = document.querySelector('.comments-section');
+    if (!commentsSection) return;
+
+    commentsSection.addEventListener('click', function(e) {
+        if (!isLoggedIn && (e.target.closest('.btn-add-comment') || e.target.closest('.btn-reply'))) {
+            alert('Please log in to comment.');
+            return;
+        }
+    });
+
+    const commentInput = document.querySelector('.comment-input');
+    if (commentInput) {
+        commentInput.addEventListener('focus', function(e) {
+            if (!isLoggedIn) {
+                this.blur();
+                alert('Please log in to comment.');
+            }
+        });
+    }
+}

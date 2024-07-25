@@ -1417,8 +1417,29 @@ nav ul li a .material-icons {
 
 /* Upvote */
 
-.upvote-btn.active, .downvote-btn.active {
-    color: blue;
+.post .post-stats .post-stats-left .upvote-btn.active,
+.post .post-stats .post-stats-left .downvote-btn.active {
+    color: var(--primary-color) !important;
+}
+
+.post .post-stats .post-stats-left .upvote-btn:hover,
+.post .post-stats .post-stats-left .downvote-btn:hover {
+    color: var(--secondary-color) !important;
+}
+
+.post .post-stats .post-stats-right .bookmark-btn,
+.full-post .post-stats .post-stats-right .bookmark-btn {
+    transition: color 0.3s ease;
+}
+
+.post .post-stats .post-stats-right .bookmark-btn:hover,
+.full-post .post-stats .post-stats-right .bookmark-btn:hover {
+    color: var(--secondary-color) !important;
+}
+
+.post .post-stats .post-stats-right .bookmark-btn.active,
+.full-post .post-stats .post-stats-right .bookmark-btn.active {
+    color: var(--primary-color) !important;
 }
 
 /* Error and Success Messages */

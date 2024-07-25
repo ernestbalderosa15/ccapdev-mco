@@ -1,6 +1,6 @@
 {{!-- pages/post.hbs --}}
 
-<article class="post full-post" data-post-id="{{post._id}}">
+<article class="post full-post" data-post-id="{{post._id}}" data-user-logged-in="{{#if user}}true{{else}}false{{/if}}">
     <div class="back-link">
         <a href="/" class="btn-icon"><span class="material-icons">arrow_back</span> Back</a>
     </div>
@@ -34,29 +34,29 @@
         <span class="tag">{{this}}</span>
         {{/each}}
     </div>
-    <div class="post-stats">
-        <div class="post-stats-left">
-            <button class="btn-icon upvote-btn" data-post-id="{{this._id}}">
-                <span class="material-icons">arrow_upward</span> 
-                <span class="upvote-count">{{this.upvotes.length}}</span>
-            </button>
-            <button class="btn-icon downvote-btn" data-post-id="{{this._id}}">
-                <span class="material-icons">arrow_downward</span>
-            </button>
-            <button class="btn-icon">
-                <span class="material-icons">comment</span> 
-                {{this.comments.length}}
-            </button>
-        </div>
-        <div class="post-stats-right">
-            <button class="btn-icon bookmark-btn" data-post-id="{{post._id}}">
-                <span class="material-icons">bookmark</span>
-            </button>
-            <button class="btn-icon share-btn" data-post-id="{{post._id}}">
-                <span class="material-icons">share</span>
-            </button>
-        </div>
+<div class="post-stats">
+    <div class="post-stats-left">
+        <button class="btn-icon upvote-btn {{#if (eq post.userVote 'upvote')}}active{{/if}}" data-post-id="{{post._id}}">
+            <span class="material-icons">arrow_upward</span> 
+            <span class="upvote-count">{{post.upvotes.length}}</span>
+        </button>
+        <button class="btn-icon downvote-btn {{#if (eq post.userVote 'downvote')}}active{{/if}}" data-post-id="{{post._id}}">
+            <span class="material-icons">arrow_downward</span>
+        </button>
+        <button class="btn-icon">
+            <span class="material-icons">comment</span> 
+            {{post.comments.length}}
+        </button>
     </div>
+    <div class="post-stats-right">
+        <button class="btn-icon bookmark-btn {{#if post.isBookmarked}}active{{/if}}" data-post-id="{{post._id}}">
+            <span class="material-icons">{{#if post.isBookmarked}}bookmark{{else}}bookmark_border{{/if}}</span>
+        </button>
+        <button class="btn-icon share-btn" data-post-id="{{post._id}}">
+            <span class="material-icons">share</span>
+        </button>
+    </div>
+</div>
 
     <div class="comments-section">
         <h3>Comments</h3>

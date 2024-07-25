@@ -11,7 +11,7 @@
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
 </head>
-<body>
+<body data-user-logged-in="{{#if user}}true{{else}}false{{/if}}">
     {{> header user=user}}
     <main class="container">
         <div class="columns">

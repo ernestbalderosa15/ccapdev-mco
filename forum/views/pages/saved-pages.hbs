@@ -2,22 +2,18 @@
 
 <div class="saved-pages">
 {{#each posts}}
-<article class="post">
+<article class="post" data-post-id="{{this._id}}">
     <div class="post-header">
         <div class="post-user">
-            <img src="https://i.pravatar.cc/150?img={{this.avatarId}}" alt="{{this.user}}" class="avatar small">
-            <span class="username">{{this.user}}</span>
-            <span class="time">{{this.time}}</span>
-        </div>
-        <div class="post-actions">
-            <button class="post-menu"><span class="material-icons">more_vert</span></button>
-            <div class="post-menu-content">
-                <a href="#" class="edit-post" data-post-id="{{post.id}}">Edit</a>                        <a href="#" class="share-comment">Share</a>
-                <a href="#">Delete</a>
-            </div>
+            <img src="{{this.user.avatar}}" alt="{{this.user.username}}" class="avatar small">
+            <span class="username">{{this.user.username}}</span>
+            <span class="time">{{formatDate this.createdAt}}</span>
         </div>
     </div>
-    <h2 class="post-title">{{this.title}}</h2>
+    <h2 class="post-title"><a href="/post/{{this._id}}">{{this.title}}</a></h2>
+    <div class="post-content-preview">
+        {{{truncateHtml this.content 150}}}
+    </div>
     {{#if this.image}}
     <img src="{{this.image}}" alt="Post image" class="post-image">
     {{/if}}
@@ -28,15 +24,34 @@
     </div>
     <div class="post-stats">
         <div class="post-stats-left">
-            <button class="btn-icon"><span class="material-icons">arrow_upward</span> {{this.upvotes}}</button>
-            <button class="btn-icon"><span class="material-icons">arrow_downward</span></button>
-            <button class="btn-icon"><span class="material-icons">comment</span> {{this.comments}}</button>
+            <button class="btn-icon upvote-btn {{#if (eq this.userVote 'upvote')}}active{{/if}}" data-post-id="{{this._id}}">
+                <span class="material-icons">arrow_upward</span> 
+                <span class="upvote-count">{{this.upvotes.length}}</span>
+            </button>
+            <button class="btn-icon downvote-btn {{#if (eq this.userVote 'downvote')}}active{{/if}}" data-post-id="{{this._id}}">
+                <span class="material-icons">arrow_downward</span>
+            </button>
+            <button class="btn-icon">
+                <span class="material-icons">comment</span> 
+                {{this.comments.length}}
+            </button>
         </div>
         <div class="post-stats-right">
-            <button class="btn-icon saved"><span class="material-icons" style="color: var(--primary-color);">bookmark</span></button>
-            <button class="btn-icon"><span class="material-icons">share</span></button>
+            <button class="btn-icon bookmark-btn active" data-post-id="{{this._id}}">
+                <span class="material-icons">bookmark</span>
+            </button>
+            <button class="btn-icon share-btn" data-post-id="{{this._id}}">
+                <span class="material-icons">share</span>
+            </button>
         </div>
     </div>
 </article>
-    {{/each}}
+{{/each}}
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initializeVoting();
+    initializeBookmarking();
+});
+</script>

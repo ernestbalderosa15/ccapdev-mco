@@ -76,6 +76,7 @@ const hbs = create({
     helpers: {
         formatDate: (date) => new Date(date).toLocaleString(),
         eq: (v1, v2) => v1 === v2,
+        subtract: function(a, b) { return a - b; },
         json: (context) => JSON.stringify(context),
         truncate: (str, len) => {
             if (str.length > len && str.length > 0) {

@@ -1,8 +1,8 @@
-{{!-- pages/home.hbs --}}
+{{!-- views/pages/trending.hbs --}}
 
 <div id="posts-container">
     {{#each posts}}
-    <article class="post" data-post-id="{{this._id}} ">
+<article class="post" data-post-id="{{this._id}}" data-vote-score="{{subtract this.upvotes.length this.downvotes.length}}">
         <div class="post-header">
             <div class="post-user">
                 <img src="{{this.user.avatar}}" alt="{{this.user.username}}" class="avatar small">
@@ -37,9 +37,9 @@
         </button>
     </div>
     <div class="post-stats-right">
-<button class="btn-icon bookmark-btn {{#if this.isBookmarked}}active{{/if}}" data-post-id="{{this._id}}">
-    <span class="material-icons">{{#if this.isBookmarked}}bookmark{{else}}bookmark_border{{/if}}</span>
-</button>
+        <button class="btn-icon bookmark-btn {{#if this.isBookmarked}}active{{/if}}" data-post-id="{{this._id}}">
+            <span class="material-icons">{{#if this.isBookmarked}}bookmark{{else}}bookmark_border{{/if}}</span>
+        </button>
         <button class="btn-icon share-btn" data-post-id="{{this._id}}">
             <span class="material-icons">share</span>
         </button>
@@ -56,8 +56,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const isLoggedIn = {{#if user}}true{{else}}false{{/if}};
-    window.isLoggedIn = isLoggedIn; 
-    let page = 1;
+    window.isLoggedIn = isLoggedIn; // Make it globally accessible   
     let loading = false;
 
     // Add click event listeners to post containers
@@ -75,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function() {
         loading = true;
         document.getElementById('loading').style.display = 'block';
 
-        fetch(`/api/posts?page=${page + 1}`)
+        fetch(`/api/trending?page=${page + 1}`)
             .then(response => response.json())
             .then(newPosts => {
                 if (newPosts.length > 0) {
