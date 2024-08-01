@@ -1,8 +1,6 @@
-// routes/searchRoutes.js
-// routes/searchRoutes.js
 const express = require('express');
 const router = express.Router();
-const Post = require('../models/Post'); // Make sure to import your Post model
+const Post = require('../models/Post');
 
 router.get('/search', async (req, res) => {
     res.setHeader('Cache-Control', 'no-store, max-age=0');
@@ -35,23 +33,29 @@ router.get('/search', async (req, res) => {
             .limit(20)
             .lean();
 
-            if (isLoggedIn) {
-                const userId = req.user._id.toString();
-                results.forEach(post => {
-                    post.userVote = post.upvotes.includes(userId) ? 'upvote' : 
-                                    post.downvotes.includes(userId) ? 'downvote' : null;
-                                    post.isBookmarked = req.user.bookmarkedPosts.some(id => id.toString() === post._id.toString());
-                });
-            }
-    
-            res.render('search-results', { 
-                results, 
-                query: query || tag, 
-                searchType,
-                isLoggedIn,
-                user: req.user
+        if (isLoggedIn && req.user) {
+            const userId = req.user._id.toString();
+            const userBookmarks = req.user.bookmarkedPosts || [];
+            results.forEach(post => {
+                post.userVote = post.upvotes && post.upvotes.includes(userId) ? 'upvote' : 
+                                post.downvotes && post.downvotes.includes(userId) ? 'downvote' : null;
+                post.isBookmarked = userBookmarks.some(id => id.toString() === post._id.toString());
             });
-        } catch (error) {
+        } else {
+            results.forEach(post => {
+                post.userVote = null;
+                post.isBookmarked = false;
+            });
+        }
+
+        res.render('search-results', { 
+            results, 
+            query: query || tag, 
+            searchType,
+            isLoggedIn,
+            user: req.user
+        });
+    } catch (error) {
         console.error('Search error:', error);
         res.status(500).render('error', { message: 'An error occurred while searching' });
     }

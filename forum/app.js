@@ -27,17 +27,13 @@ const PORT = process.env.PORT || 3000;
  */
 async function connectToDatabase() {
     try {
-        await mongoose.connect(mongoURI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
+        await mongoose.connect(mongoURI);
         console.log(`Connected to MongoDB: ${dbName}`);
-        await testDatabaseConnection();
     } catch (err) {
         console.error('MongoDB connection error:', err);
+        process.exit(1);
     }
 }
-
 /**
  * Tests the database connection by creating and deleting a test document
  */
@@ -147,7 +143,6 @@ app.use((req, res, next) => {
 // Import routes
 const indexRoutes = require('./routes/index');
 const { router: authRoutes, authMiddleware } = require('./routes/authRoutes');
-console.log('authMiddleware:', typeof authMiddleware);
 const createPostRouter = require('./routes/createPost');
 const searchRoutes = require('./routes/searchRoutes');
 

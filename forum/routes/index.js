@@ -74,8 +74,8 @@ router.get('/', (req, res, next) => {
 
 // Post route
 router.get('/post/:id', async (req, res) => {
-    
     try {
+        console.log('Fetching post with ID:', req.params.id);
         const post = await Post.findById(req.params.id)
             .populate('user', 'username profilePicture')
             .populate({
@@ -90,7 +90,10 @@ router.get('/post/:id', async (req, res) => {
             })
             .lean();
 
+        console.log('Post fetched:', post ? 'Yes' : 'No');
+
         if (!post) {
+            console.log('Post not found');
             return res.status(404).render('error', { 
                 title: 'Post Not Found', 
                 message: 'The requested post could not be found.',
@@ -98,19 +101,34 @@ router.get('/post/:id', async (req, res) => {
             });
         }
 
+        console.log('Post user:', post.user);
+
         const isLoggedIn = !!req.user;
-        if (isLoggedIn && req.user._id) {
+        console.log('Is user logged in:', isLoggedIn);
+        
+        let isAuthor = false;
+        
+        if (isLoggedIn) {
+            console.log('Logged in user ID:', req.user._id);
             const userId = req.user._id.toString();
             const userBookmarks = req.user.bookmarkedPosts ? req.user.bookmarkedPosts.map(id => id.toString()) : [];
-            post.userVote = post.upvotes.some(id => id.toString() === userId) ? 'upvote' : 
-                            post.downvotes.some(id => id.toString() === userId) ? 'downvote' : null;
+            
+            if (post.upvotes && Array.isArray(post.upvotes)) {
+                post.userVote = post.upvotes.some(id => id.toString() === userId) ? 'upvote' : 
+                                (post.downvotes && Array.isArray(post.downvotes) && post.downvotes.some(id => id.toString() === userId)) ? 'downvote' : null;
+            } else {
+                console.log('Post upvotes is not an array:', post.upvotes);
+                post.userVote = null;
+            }
+            
             post.isBookmarked = userBookmarks.includes(post._id.toString());
+            isAuthor = post.user && post.user._id && (post.user._id.toString() === userId);
+        } else {
+            post.userVote = null;
+            post.isBookmarked = false;
         }
 
-        const postUserId = post.user._id.toString();
-        const currentUserId = req.user ? (req.user._id || req.user.id).toString() : null;
-        const isAuthor = currentUserId === postUserId;
-
+        console.log('Rendering post page');
         res.render('pages/post', { 
             title: post.title, 
             post,
@@ -127,8 +145,6 @@ router.get('/post/:id', async (req, res) => {
         });
     }
 });
-
-
 // My Interests route
  
 router.get('/my-interests', isAuthenticated, (req, res) => {

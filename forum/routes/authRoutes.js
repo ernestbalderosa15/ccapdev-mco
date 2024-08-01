@@ -1,6 +1,6 @@
 /**
  * Authentication Routes
- * This module handles user authentication, including signup, login, and logout functionalities.
+ * Handles user authentication, including signup, login, and logout functions.
  */
 
 const express = require('express');
