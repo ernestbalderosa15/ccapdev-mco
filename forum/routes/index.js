@@ -202,6 +202,10 @@ router.get('/profile/:username?', async (req, res) => {
             return res.status(404).render('error', { title: 'Not Found', message: 'User not found' });
         }
 
+        // Ensure posts and comments are defined before accessing their properties
+        user.posts = user.posts || [];
+        user.comments = user.comments || [];
+
         user.postCount = user.posts.length;
         user.profilePicture = user.profilePicture || '/images/default-avatar.jpg';
 
