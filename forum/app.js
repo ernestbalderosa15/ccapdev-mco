@@ -96,6 +96,10 @@ const hbs = create({
                 return strippedHtml.substring(0, length) + '...';
             }
             return strippedHtml;
+        },
+        join: function(array, separator) {
+            if (!Array.isArray(array)) return '';
+            return array.join(separator);
         }
     },
     runtimeOptions: {
@@ -135,10 +139,17 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use((req, res, next) => {
+    req.session.touch();
+    next();
+});
+
 // Import routes
 const indexRoutes = require('./routes/index');
 const { router: authRoutes, authMiddleware } = require('./routes/authRoutes');
+console.log('authMiddleware:', typeof authMiddleware);
 const createPostRouter = require('./routes/createPost');
+const searchRoutes = require('./routes/searchRoutes');
 
 // Apply authentication middleware
 app.use(authMiddleware);
@@ -147,6 +158,7 @@ app.use(authMiddleware);
 app.use('/', indexRoutes);
 app.use('/', authRoutes);
 app.use('/', createPostRouter);
+app.use('/', searchRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

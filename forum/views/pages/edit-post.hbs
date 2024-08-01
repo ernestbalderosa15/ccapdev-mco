@@ -4,7 +4,7 @@
     </div>
     <h2 class="post-title">Edit Post</h2>
     <div id="error-message" style="color: red;"></div>
-    <form id="post-form">
+    <form id="post-form" data-post-id="{{post._id}}">
         <div class="form-group">
             <label for="post-title">Title</label>
             <input type="text" id="post-title" name="title" class="form-input" value="{{post.title}}" required>
@@ -34,81 +34,87 @@
 <script src="https://cdn.ckeditor.com/ckeditor5/27.1.0/classic/ckeditor.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    let editor;
-    const tags = new Set({{json post.tags}});
+    const editForm = document.getElementById('post-form');
+    if (editForm) {
+        let editor;
 
-    ClassicEditor
-        .create(document.querySelector('#editor'), {
-            toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote'],
-        })
-        .then(newEditor => {
-            editor = newEditor;
-        })
-        .catch(error => {
-            console.error('CKEditor initialization error:', error);
+        // Initialize CKEditor
+        ClassicEditor
+            .create(document.querySelector('#editor'))
+            .then(newEditor => {
+                editor = newEditor;
+            })
+            .catch(error => {
+                console.error('CKEditor initialization error:', error);
+            });
+
+        // Tag functionality
+        const tagInput = document.getElementById('post-tags');
+        const tagsContainer = document.getElementById('tags-container');
+        const tags = new Set(Array.from(tagsContainer.querySelectorAll('.tag')).map(tag => tag.textContent.trim()));
+
+        tagInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const tag = this.value.trim();
+                if (tag && !tags.has(tag)) {
+                    addTag(tag);
+                    this.value = '';
+                }
+            }
         });
 
-    const tagInput = document.getElementById('post-tags');
-    const tagsContainer = document.getElementById('tags-container');
-
-    // Initialize tags
-    tags.forEach(tag => addTag(tag));
-
-    tagInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            const tag = this.value.trim();
-            if (tag && !tags.has(tag)) {
-                addTag(tag);
-                this.value = '';
+        tagsContainer.addEventListener('click', function(e) {
+            if (e.target.classList.contains('material-icons') && e.target.textContent === 'close') {
+                const tagElement = e.target.closest('.tag');
+                const tag = tagElement.textContent.trim();
+                tags.delete(tag);
+                tagElement.remove();
             }
+        });
+
+        function addTag(tag) {
+            tags.add(tag);
+            const tagElement = document.createElement('span');
+            tagElement.classList.add('tag');
+            tagElement.innerHTML = `${tag} <span class="material-icons">close</span>`;
+            tagsContainer.appendChild(tagElement);
         }
-    });
 
-    function addTag(tag) {
-        tags.add(tag);
-        const tagElement = document.createElement('span');
-        tagElement.classList.add('tag');
-        tagElement.innerHTML = `${tag} <span class="material-icons">close</span>`;
-        tagElement.querySelector('.material-icons').addEventListener('click', function() {
-            tags.delete(tag);
-            tagElement.remove();
+        // Handle form submission
+        editForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const postId = this.dataset.postId;
+            const title = document.getElementById('post-title').value;
+            const content = editor.getData();
+            
+            const data = {
+                title: title,
+                content: content,
+                tags: Array.from(tags)
+            };
+            
+            fetch(`/edit-post/${postId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = `/post/${data._id}`;
+                } else {
+                    throw new Error(data.error || 'An error occurred');
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                document.getElementById('error-message').textContent = 'Error: ' + error.message;
+            });
         });
-        tagsContainer.appendChild(tagElement);
     }
-
-    document.getElementById('post-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const title = document.getElementById('post-title').value;
-        const content = editor.getData();
-        const tagArray = Array.from(tags);
-        
-        const data = {
-            title: title,
-            content: content,
-            tags: tagArray
-        };
-        
-        fetch('/edit-post/{{post._id}}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                throw new Error(data.error);
-            }
-            // Redirect to the updated post page
-            window.location.href = '/post/' + data._id;
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-            document.getElementById('error-message').textContent = 'Error: ' + error.message;
-        });
-    });
 });
 </script>

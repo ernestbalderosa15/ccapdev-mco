@@ -5,9 +5,9 @@ const postSchema = new mongoose.Schema({
   title: { type: String, required: true },
   content: { type: String, required: true },
   image: { type: String },
-  tags: [{ type: String }],
-  upvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
-  downvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }], 
+  tags: { type: [String], default: []},
+  upvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  downvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }

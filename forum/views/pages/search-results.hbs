@@ -1,0 +1,67 @@
+{{!-- views/search-results.hbs --}}
+
+<div class="search-results-container">
+    {{#if results.length}}
+        <div id="posts-container">
+            {{#each results}}
+            <article class="post" data-post-id="{{this._id}}">
+                <div class="post-header">
+                    <div class="post-user">
+                        <img src="{{this.profilePicture}}" alt="{{this.username}}" class="avatar small" onerror="handleImageError(this)">
+                        <span class="username">{{this.user.username}}</span>
+                        <span class="time">{{formatDate this.createdAt}}</span>
+                    </div>
+                </div>
+                <h2 class="post-title"><a href="/post/{{this._id}}">{{this.title}}</a></h2>
+                <div class="post-content-preview">
+                    {{{truncateHtml this.content 150}}}
+                </div>
+                {{#if this.image}}
+                <img src="{{this.image}}" alt="Post image" class="post-image">
+                {{/if}}
+                <div class="post-tags">
+                    {{#each this.tags}}
+                    <a href="/search?tag={{this}}" class="tag">{{this}}</a>
+                    {{/each}}
+                </div>
+    <div class="post-stats">
+        <div class="post-stats-left">
+            <button class="btn-icon upvote-btn {{#if (eq this.userVote 'upvote')}}active{{/if}}" data-post-id="{{this._id}}">
+                <span class="material-icons">arrow_upward</span> 
+                <span class="upvote-count">{{this.upvotes.length}}</span>
+            </button>
+            <button class="btn-icon downvote-btn {{#if (eq this.userVote 'downvote')}}active{{/if}}" data-post-id="{{this._id}}">
+                <span class="material-icons">arrow_downward</span>
+            </button>
+                        <button class="btn-icon">
+                            <span class="material-icons">comment</span> 
+                            {{this.comments.length}}
+                        </button>
+                    </div>
+        <div class="post-stats-right">
+            <button class="btn-icon bookmark-btn {{#if this.isBookmarked}}active{{/if}}" data-post-id="{{this._id}}">
+                <span class="material-icons">{{#if this.isBookmarked}}bookmark{{else}}bookmark_border{{/if}}</span>
+            </button>
+                        <button class="btn-icon share-btn" data-post-id="{{this._id}}">
+                            <span class="material-icons">share</span>
+                        </button>
+                    </div>
+                </div>
+            </article>
+            {{/each}}
+        </div>
+    {{else}}
+        <p class="no-results">No results found for "{{query}}"</p>
+    {{/if}}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const isLoggedIn = {{isLoggedIn}};
+    window.isLoggedIn = isLoggedIn;
+    
+    initializePostClickHandlers();
+    initializeVoting();
+    initializeBookmarking();
+});
+</script>

@@ -12,7 +12,13 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body data-user-logged-in="{{#if user}}true{{else}}false{{/if}}">
+<div style="display:none;">
+  <p>Debug Info:</p>
+  <pre>{{json user}}</pre>
+</div>
+
     {{> header user=user}}
+    
     <main class="container">
         <div class="columns">
             {{> leftSidebar}}
@@ -22,7 +28,7 @@
             </section>
 
             {{#if user}}
-                {{> rightSidebar}}
+            {{> rightSidebar user=user}}
             {{else}}
                 <div class="right-column-placeholder"></div>
             {{/if}}

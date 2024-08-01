@@ -29,32 +29,35 @@ const isAuthenticated = (req, res, next) => {
 };
 
 
-/**
- * Home route - displays recent posts
- * @route GET /
- */
+
 // Home route
-router.get('/', async (req, res) => {
+router.get('/', (req, res, next) => {
+    res.setHeader('Cache-Control', 'no-store, max-age=0');
+    next();
+}, async (req, res) => {
     try {
         const isLoggedIn = !!req.user;
+        console.log('Is user logged in:', isLoggedIn);
+        console.log('User object:', req.user);
+
         const limit = isLoggedIn ? 0 : 15;
 
         const posts = await Post.find()
-            .populate('user', 'username avatar')
+            .populate('user', 'username profilePicture') 
             .populate('comments')
             .sort('-createdAt')
             .limit(limit)
-            .lean();
+            .lean({ virtuals: true });
 
-        if (isLoggedIn && req.user._id) {
-            const userId = req.user._id.toString();
-            const userBookmarks = req.user.bookmarkedPosts ? req.user.bookmarkedPosts.map(id => id.toString()) : [];
-            posts.forEach(post => {
-                post.userVote = post.upvotes && post.upvotes.some(id => id.toString() === userId) ? 'upvote' : 
-                                post.downvotes && post.downvotes.some(id => id.toString() === userId) ? 'downvote' : null;
-                post.isBookmarked = userBookmarks.includes(post._id.toString());
-            });
-        }
+            if (isLoggedIn && req.user._id) {
+                const userId = req.user._id.toString();
+                const userBookmarks = req.user.bookmarkedPosts ? req.user.bookmarkedPosts.map(id => id.toString()) : [];
+                posts.forEach(post => {
+                    post.userVote = (post.upvotes && post.upvotes.some(id => id.toString() === userId)) ? 'upvote' : 
+                                    (post.downvotes && post.downvotes.some(id => id.toString() === userId)) ? 'downvote' : null;
+                    post.isBookmarked = userBookmarks.includes(post._id.toString());
+                });
+            }
 
         res.render('pages/home', { 
             title: 'Home', 
@@ -62,31 +65,26 @@ router.get('/', async (req, res) => {
             isLoggedIn,
             user: req.user
         });
+        console.log('Rendered home page with user:', req.user);
     } catch (error) {
         console.error('Error fetching posts:', error);
         res.status(500).render('pages/error', { title: 'Server Error', message: 'Error fetching posts' });
     }
 });
 
-/**
- * Retrieves and renders a single post
- * 
- * @route GET /post/:id
- * @param {string} req.params.id - The ID of the post to retrieve.
- * @param {Object} req.user - The current authenticated user (if any).
- * @returns {void} Renders the post page or an error page.
- */
+// Post route
 router.get('/post/:id', async (req, res) => {
+    
     try {
         const post = await Post.findById(req.params.id)
-            .populate('user', 'username avatar _id')
+            .populate('user', 'username profilePicture')
             .populate({
                 path: 'comments',
                 populate: [
-                    { path: 'user', select: 'username avatar _id' },
+                    { path: 'user', select: 'username profilePicture' },
                     { 
                         path: 'replies',
-                        populate: { path: 'user', select: 'username avatar _id' }
+                        populate: { path: 'user', select: 'username profilePicture' }
                     }
                 ]
             })
@@ -131,24 +129,21 @@ router.get('/post/:id', async (req, res) => {
 });
 
 
-/**
- * My Interests route
- */
+// My Interests route
+ 
 router.get('/my-interests', isAuthenticated, (req, res) => {
     res.render('my-interests', { title: 'My Interests', user: req.user });
 });
 
-/**
- * Saved Pages route
- */
+// Saved Pages route
 router.get('/saved', isAuthenticated, async (req, res) => {
     try {
         const user = await User.findById(req.user._id)
             .populate({
                 path: 'bookmarkedPosts',
-                populate: { path: 'user', select: 'username avatar' }
+                populate: { path: 'user', select: 'username profilePicture' }
             })
-            .lean();
+        .lean();
 
         const posts = user.bookmarkedPosts.map(post => ({
             ...post,
@@ -168,11 +163,8 @@ router.get('/saved', isAuthenticated, async (req, res) => {
         res.status(500).render('error', { message: 'Error fetching saved posts' });
     }
 });
-/**
- * Profile route
- * @route GET /profile/:username?
- * @param {string} req.params.username - Optional username to view profile (if not provided, shows current user's profile)
- */
+
+// Profile route
 router.get('/profile/:username?', async (req, res) => {
     try {
         const username = req.params.username || (req.user ? req.user.username : null);
@@ -202,6 +194,7 @@ router.get('/profile/:username?', async (req, res) => {
             isOwnProfile: isOwnProfile,
             layout: 'profile-layout' 
         });
+        
     } catch (error) {
         console.error('Error fetching user profile:', error);
         res.status(500).render('error', { title: 'Server Error', message: 'Error fetching user profile' });
@@ -209,29 +202,18 @@ router.get('/profile/:username?', async (req, res) => {
 });
 
 
-/**
- * Settings route
- */
+// Settings
 router.get('/settings', isAuthenticated, (req, res) => {
     res.render('settings', { title: 'Settings', user: req.user });
 });
 
-/**
- * Checks if the current user is authorized to modify the given post.
- * @param {Object} post - The post to check.
- * @param {Object} user - The current user.
- * @returns {boolean} True if authorized, false otherwise.
- */
+// Is user authorized to edit post
 function isAuthorized(post, user) {
     if (!user || !user._id || !post.user._id) return false;
     return post.user._id.toString() === (user._id || user.id).toString();
 }
 
-/**
- * Renders the edit post form.
- * @route GET /edit-post/:id
- * @param {string} req.params.id - The ID of the post to edit.
- */
+// Edit post route
 router.get('/edit-post/:id', isAuthenticated, async (req, res) => {
     try {
         const post = await Post.findById(req.params.id).populate('user', 'username _id');
@@ -250,48 +232,31 @@ router.get('/edit-post/:id', isAuthenticated, async (req, res) => {
     }
 });
 
-/**
- * Handles the post update.
- * @route POST /edit-post/:id
- * @param {string} req.params.id - The ID of the post to update.
- * @param {Object} req.body - The updated post data.
- */
+// Update post after edit
 router.post('/edit-post/:id', isAuthenticated, async (req, res) => {
     try {
-        const { title, content, tags } = req.body;
-        const post = await Post.findById(req.params.id).populate('user', 'username _id');
-
+        const post = await Post.findById(req.params.id);
         if (!post) {
             return res.status(404).json({ error: 'Post not found' });
         }
-
-        if (!isAuthorized(post, req.user)) {
-            return res.status(403).json({ error: 'You are not authorized to edit this post' });
+        if (post.user.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ error: 'Not authorized to edit this post' });
         }
 
-        const sanitizedContent = sanitizeHtml(content, {
-            allowedTags: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li'],
-            allowedAttributes: {}
-        });
-
-        post.title = title;
-        post.content = sanitizedContent;
-        post.tags = Array.isArray(tags) ? tags : [];
+        post.title = req.body.title;
+        post.content = req.body.content;
+        post.tags = req.body.tags;
 
         await post.save();
 
-        res.status(200).json({ success: true, _id: post._id });
+        res.json({ success: true, _id: post._id });
     } catch (error) {
         console.error('Error updating post:', error);
         res.status(500).json({ error: 'Error updating post' });
     }
 });
 
-/**
- * Deletes a post.
- * @route DELETE /delete-post/:id
- * @param {string} req.params.id - The ID of the post to delete.
- */
+// Delete post
 router.delete('/delete-post/:id', authMiddleware, async (req, res) => {
     try {
         const post = await Post.findById(req.params.id).populate('user', 'username _id');
@@ -337,6 +302,13 @@ router.post('/post/:id/upvote', authMiddleware, async (req, res) => {
         }
 
         await post.save();
+
+        // Update user's upvotes
+        await User.findByIdAndUpdate(userId, {
+            $addToSet: { upvotes: post._id },
+            $pull: { downvotes: post._id }
+        });
+
         res.json({ 
             upvotes: post.upvotes.length, 
             downvotes: post.downvotes.length,
@@ -413,10 +385,7 @@ router.post('/post/:id/bookmark', isAuthenticated, async (req, res) => {
     }
 });
 
-/**
- * Trending route - displays posts sorted by upvotes
- * @route GET /trending
- */
+// Trending route
 router.get('/trending', async (req, res) => {
     try {
         const isLoggedIn = !!req.user;
@@ -431,9 +400,10 @@ router.get('/trending', async (req, res) => {
         ]).exec();
 
         const populatedPosts = await Post.populate(posts, [
-            { path: 'user', select: 'username avatar' },
+            { path: 'user', select: 'username profilePicture' },
             { path: 'comments' }
         ]);
+        
 
         if (isLoggedIn && req.user._id) {
             const userId = req.user._id.toString();
@@ -457,11 +427,7 @@ router.get('/trending', async (req, res) => {
     }
 });
 
-/**
- * API route to fetch trending posts
- * @route GET /api/trending
- * @param {number} req.query.page - Page number 
- */
+// Trending api 
 router.get('/api/trending', async (req, res) => {
     try {
         const page = Math.max(1, parseInt(req.query.page) || 1);
@@ -469,7 +435,7 @@ router.get('/api/trending', async (req, res) => {
         const skip = (page - 1) * limit;
 
         const posts = await Post.find()
-            .populate('user', 'username avatar')
+            .populate('user', 'username profilePicture')
             .populate('comments')
             .sort('-upvotes.length') // Sort by number of upvotes in descending order
             .skip(skip)

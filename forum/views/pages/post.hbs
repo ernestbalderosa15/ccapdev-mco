@@ -7,7 +7,7 @@
     <div class="post full-post">
         <div class="post-header">
             <div class="post-user">
-                <img src="{{post.user.avatar}}" alt="{{post.user.username}}" class="avatar small">
+                <img src="{{post.user.profilePicture}}" alt="{{post.user.username}}" class="avatar small" onerror="handleImageError(this)">
                 <span class="username">{{post.user.username}}</span>
                 <span class="time">{{formatDate post.createdAt}}</span>
             </div>
@@ -29,11 +29,10 @@
     <div class="post-content">
         {{{post.content}}}
     </div>
-    <div class="post-tags">
-        {{#each post.tags}}
-        <span class="tag">{{this}}</span>
-        {{/each}}
-    </div>
+<div class="post-tags">{{#each post.tags}}
+    <a href="/search?tag={{this}}" class="tag">{{this}}</a>
+    {{/each}}
+</div>
 <div class="post-stats">
     <div class="post-stats-left">
         <button class="btn-icon upvote-btn {{#if (eq post.userVote 'upvote')}}active{{/if}}" data-post-id="{{post._id}}">
@@ -72,7 +71,7 @@
             <div class="comment">
                 <div class="comment-header">
                     <div class="comment-user-info">
-                        <img src="{{this.user.avatar}}" alt="{{this.user.username}}" class="avatar small">
+                        <img src="{{this.user.profilePicture}}" alt="{{this.user.username}}" class="avatar small">
                         <span class="username">{{this.user.username}}</span>
                         <span class="time">{{formatDate this.createdAt}}</span>
                     </div>

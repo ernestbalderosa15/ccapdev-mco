@@ -5,7 +5,7 @@
 <article class="post" data-post-id="{{this._id}}">
     <div class="post-header">
         <div class="post-user">
-            <img src="{{this.user.avatar}}" alt="{{this.user.username}}" class="avatar small">
+            <img src="{{this.user.profilePicture}}" alt="{{this.user.username}}" class="avatar small" onerror="handleImageError(this)">
             <span class="username">{{this.user.username}}</span>
             <span class="time">{{formatDate this.createdAt}}</span>
         </div>
@@ -17,11 +17,11 @@
     {{#if this.image}}
     <img src="{{this.image}}" alt="Post image" class="post-image">
     {{/if}}
-    <div class="post-tags">
-        {{#each this.tags}}
-        <span class="tag">{{this}}</span>
-        {{/each}}
-    </div>
+        <div class="post-tags">
+            {{#each this.tags}}
+            <a href="/search?tag={{this}}" class="tag">{{this}}</a>
+            {{/each}}
+        </div>
     <div class="post-stats">
         <div class="post-stats-left">
             <button class="btn-icon upvote-btn {{#if (eq this.userVote 'upvote')}}active{{/if}}" data-post-id="{{this._id}}">

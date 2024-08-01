@@ -4,10 +4,18 @@
 
 let isLoggedIn = false;
 
+window.handleImageError = function(img) {
+    console.error('Failed to load image:', img.src);
+    img.src = '/images/default-avatar.jpg';
+    console.log('Fallback image set');
+};
 document.addEventListener('DOMContentLoaded', function() {
-    // Get the login state
-    const postElement = document.querySelector('.post.full-post');
     isLoggedIn = document.body.dataset.userLoggedIn === 'true';
+    
+    initializeImageErrorHandling();
+    initializeVoting();
+    initializeBookmarking();
+    initializeTagClickHandlers();
 
     // Initialize comments functionality if comments list exists
     if (document.querySelector('.comments-list')) {
@@ -27,14 +35,17 @@ document.addEventListener('DOMContentLoaded', function() {
         initializeAboutMeEditor();
     }
 
-    // Initialize voting functionality
-    initializeVoting();
-
-    initializeBookmarking();
-
     initializeCommentActions();
+    
 });
 
+function initializeImageErrorHandling() {
+    document.querySelectorAll('img.avatar').forEach(img => {
+        img.onerror = function() {
+            handleImageError(this);
+        };
+    });
+}
 
 function initializeCreatePostPage() {
     let editor;
@@ -312,23 +323,19 @@ function initializeAboutMeEditor() {
 }
 
 function initializeVoting() {
-    const voteContainers = document.querySelectorAll('.post, .full-post');
-    
-    voteContainers.forEach(container => {
-        container.addEventListener('click', function(e) {
-            const voteButton = e.target.closest('.upvote-btn, .downvote-btn');
-            if (!voteButton) return;
+    document.addEventListener('click', function(e) {
+        const voteButton = e.target.closest('.upvote-btn, .downvote-btn');
+        if (!voteButton) return;
 
-            if (!isLoggedIn) {
-                alert('Please log in to vote.');
-                return;
-            }
+        if (!isLoggedIn) {
+            alert('Please log in to vote.');
+            return;
+        }
 
-            const postId = voteButton.dataset.postId;
-            const voteType = voteButton.classList.contains('upvote-btn') ? 'upvote' : 'downvote';
+        const postId = voteButton.dataset.postId;
+        const voteType = voteButton.classList.contains('upvote-btn') ? 'upvote' : 'downvote';
 
-            handleVote(voteButton, postId, voteType);
-        });
+        handleVote(voteButton, postId, voteType);
     });
 }
 
@@ -343,9 +350,6 @@ function handleVote(button, postId, voteType) {
         })
         .then(data => {
             updateVoteUI(button, data);
-            if (window.location.pathname === '/trending') {
-                window.location.reload();
-            }
         })
         .catch(error => console.error('Error:', error));
 }
@@ -355,29 +359,14 @@ function updateVoteUI(clickedButton, data) {
     const upvoteBtn = post.querySelector('.upvote-btn');
     const downvoteBtn = post.querySelector('.downvote-btn');
     const upvoteCount = post.querySelector('.upvote-count');
-    const downvoteCount = post.querySelector('.downvote-count');
 
     if (upvoteCount) upvoteCount.textContent = data.upvotes;
-    if (downvoteCount) downvoteCount.textContent = data.downvotes;
 
     upvoteBtn.classList.toggle('active', data.userVote === 'upvote');
     downvoteBtn.classList.toggle('active', data.userVote === 'downvote');
 
     // Update the voteScore
     post.dataset.voteScore = data.upvotes - data.downvotes;
-}
-
-function reorderTrendingPosts() {
-    const postsContainer = document.getElementById('posts-container');
-    const posts = Array.from(postsContainer.children);
-
-    posts.sort((a, b) => {
-        const scoreA = parseInt(a.dataset.voteScore) || 0;
-        const scoreB = parseInt(b.dataset.voteScore) || 0;
-        return scoreB - scoreA;
-    });
-
-    posts.forEach(post => postsContainer.appendChild(post));
 }
 
 function initializeBookmarking() {
@@ -427,6 +416,35 @@ function updateBookmarkUI(button, isBookmarked) {
         icon.textContent = isBookmarked ? 'bookmark' : 'bookmark_border';
     }
 }
+
+function reorderTrendingPosts() {
+    const postsContainer = document.getElementById('posts-container');
+    const posts = Array.from(postsContainer.children);
+
+    posts.sort((a, b) => {
+        const scoreA = parseInt(a.dataset.voteScore) || 0;
+        const scoreB = parseInt(b.dataset.voteScore) || 0;
+        return scoreB - scoreA;
+    });
+
+    posts.forEach(post => postsContainer.appendChild(post));
+}
+
+function initializeBookmarking() {
+    document.addEventListener('click', function(e) {
+        const bookmarkBtn = e.target.closest('.bookmark-btn');
+        if (!bookmarkBtn) return;
+
+        if (!isLoggedIn) {
+            alert('Please log in to bookmark posts.');
+            return;
+        }
+
+        const postId = bookmarkBtn.dataset.postId;
+        handleBookmark(bookmarkBtn, postId);
+    });
+}
+
 function initializeCommentActions() {
     const commentsSection = document.querySelector('.comments-section');
     if (!commentsSection) return;
@@ -448,3 +466,29 @@ function initializeCommentActions() {
         });
     }
 }
+
+function initializeTagClickHandlers() {
+    document.addEventListener('click', function(e) {
+        const tagLink = e.target.closest('.tag');
+        if (tagLink && tagLink.tagName === 'A') {
+            e.preventDefault();
+            const tagName = tagLink.textContent.trim();
+            window.location.href = `/search?tag=${encodeURIComponent(tagName)}`;
+        }
+    });
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const searchForm = document.getElementById('search-form');
+    const searchInput = document.getElementById('search-input');
+
+    searchForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const searchQuery = searchInput.value.trim();
+        if (searchQuery) {
+            window.location.href = `/search?q=${encodeURIComponent(searchQuery)}`;
+        }
+    });
+});
+
