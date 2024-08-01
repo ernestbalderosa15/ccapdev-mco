@@ -38,16 +38,67 @@ document.addEventListener('DOMContentLoaded', function() {
     if (editForm) {
         let editor;
 
-        // Initialize CKEditor
-        ClassicEditor
-            .create(document.querySelector('#editor'))
-            .then(newEditor => {
-                editor = newEditor;
-            })
-            .catch(error => {
-                console.error('CKEditor initialization error:', error);
-            });
+class MyUploadAdapter {
+    constructor(loader) {
+        this.loader = loader;
+    }
 
+    upload() {
+        return this.loader.file
+            .then(file => new Promise((resolve, reject) => {
+                const data = new FormData();
+                data.append('upload', file);
+
+                fetch('/upload-image', {
+                    method: 'POST',
+                    body: data
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.uploaded) {
+                        resolve({ default: result.url });
+                    } else {
+                        reject(result.error.message);
+                    }
+                })
+                .catch(error => {
+                    reject('Upload failed');
+                    console.error('Error:', error);
+                });
+            }));
+    }
+
+    abort() {
+        // Abort the upload process if needed
+    }
+}
+
+function MyCustomUploadAdapterPlugin(editor) {
+    editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+        return new MyUploadAdapter(loader);
+    };
+}
+
+ClassicEditor
+    .create(document.querySelector('#editor'), {
+        extraPlugins: [MyCustomUploadAdapterPlugin],
+        toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote', '|', 'imageUpload'],
+        image: {
+            toolbar: ['imageTextAlternative', '|', 'imageStyle:alignLeft', 'imageStyle:full', 'imageStyle:alignRight'],
+            styles: [
+                'full',
+                'alignLeft',
+                'alignRight',
+            ]
+        }
+    })
+    .then(newEditor => {
+        editor = newEditor;
+    })
+    .catch(error => {
+        console.error('CKEditor initialization error:', error);
+    });
+    
         // Tag functionality
         const tagInput = document.getElementById('post-tags');
         const tagsContainer = document.getElementById('tags-container');

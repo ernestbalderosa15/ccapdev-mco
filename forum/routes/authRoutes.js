@@ -65,7 +65,7 @@ router.post('/signup', createAccountLimiter, [
 
       // Hash password and create new user
       const hashedPassword = await bcrypt.hash(password, 10);
-      const newUser = new User({ username, email, password: hashedPassword });
+      const newUser = new User({ username, email, password: hashedPassword, profilePicture: '/images/default-avatar.jpg' });
       await newUser.save();
 
       res.status(201).json({ message: 'User created successfully' });

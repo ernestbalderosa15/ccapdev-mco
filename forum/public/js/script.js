@@ -39,6 +39,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
 });
 
+function handleImageError(img) {
+    console.error('Failed to load image:', img.src);
+    img.src = '/images/default-avatar.jpg';
+    img.onerror = null; // Prevent potential infinite loop
+}
+
 function initializeImageErrorHandling() {
     document.querySelectorAll('img.avatar').forEach(img => {
         img.onerror = function() {

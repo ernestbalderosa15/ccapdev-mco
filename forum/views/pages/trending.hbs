@@ -10,8 +10,8 @@ window.handleImageError = function(img) {
 
 <div id="posts-container">
     {{#each posts}}
-<article class="post" data-post-id="{{this._id}}" data-vote-score="{{subtract this.upvotes.length this.downvotes.length}}">
-        <div class="post-header">
+<article class="post" data-post-id="{{this._id}}" data-vote-score="{{subtract this.upvotes.length this.downvotes.length}}" data-created-at="{{this.createdAt}}">
+            <div class="post-header">
             <div class="post-user">
                 <img src="{{user.profilePicture}}" alt="{{user.username}}" class="avatar small" onerror="handleImageError(this)">
                 <span class="username">{{this.user.username}}</span>
@@ -139,7 +139,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Add this to your existing script in trending.hbs
 document.addEventListener('DOMContentLoaded', function() {
     const postsContainer = document.getElementById('posts-container');
 
@@ -148,34 +147,21 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!postElement) return;
 
         postElement.setAttribute('data-vote-score', newVoteCount);
-
+        
         const posts = Array.from(postsContainer.children);
         posts.sort((a, b) => {
-            const scoreA = parseInt(a.getAttribute('data-vote-score'), 10);
-            const scoreB = parseInt(b.getAttribute('data-vote-score'), 10);
-            return scoreB - scoreA;
+            return b.getAttribute('data-vote-score') - a.getAttribute('data-vote-score');
         });
 
         posts.forEach(post => postsContainer.appendChild(post));
     }
 
     function handleVote(postId, voteType) {
-        if (!window.isLoggedIn) {
-            alert('Please log in to vote.');
-            return;
-        }
-
-        const url = `/post/${postId}/${voteType}`;
-        fetch(url, { method: 'POST' })
+        fetch(`/post/${postId}/${voteType}`, { method: 'POST' })
             .then(response => response.json())
             .then(data => {
                 const postElement = document.querySelector(`[data-post-id="${postId}"]`);
-                const upvoteBtn = postElement.querySelector('.upvote-btn');
-                const downvoteBtn = postElement.querySelector('.downvote-btn');
                 const upvoteCount = postElement.querySelector('.upvote-count');
-
-                upvoteBtn.classList.toggle('active', data.userVote === 'upvote');
-                downvoteBtn.classList.toggle('active', data.userVote === 'downvote');
                 upvoteCount.textContent = data.upvotes;
 
                 const newVoteScore = data.upvotes - data.downvotes;
@@ -185,13 +171,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     postsContainer.addEventListener('click', function(event) {
-        const upvoteBtn = event.target.closest('.upvote-btn');
-        const downvoteBtn = event.target.closest('.downvote-btn');
-        
-        if (upvoteBtn) {
-            handleVote(upvoteBtn.dataset.postId, 'upvote');
-        } else if (downvoteBtn) {
-            handleVote(downvoteBtn.dataset.postId, 'downvote');
+        const voteBtn = event.target.closest('.upvote-btn, .downvote-btn');
+        if (voteBtn) {
+            const postId = voteBtn.dataset.postId;
+            const voteType = voteBtn.classList.contains('upvote-btn') ? 'upvote' : 'downvote';
+            handleVote(postId, voteType);
         }
     });
 });

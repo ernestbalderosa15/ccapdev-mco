@@ -13,6 +13,7 @@ const mongoose = require('mongoose');
 const fs = require('fs');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
+const multer = require('multer');
 
 const app = express();
 
@@ -140,11 +141,30 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use((req, res, next) => {
+    if (req.user) {
+      req.user.profilePictureUrl = req.user.profilePicture || '/images/default-avatar.jpg';
+    }
+    next();
+  });
+
 // Import routes
 const indexRoutes = require('./routes/index');
 const { router: authRoutes, authMiddleware } = require('./routes/authRoutes');
 const createPostRouter = require('./routes/createPost');
 const searchRoutes = require('./routes/searchRoutes');
+
+// Configure multer for handling file uploads
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'public/uploads/') // Make sure this directory exists
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + path.extname(file.originalname)) // Appending extension
+    }
+});
+
+const upload = multer({ storage: storage });
 
 // Apply authentication middleware
 app.use(authMiddleware);
@@ -154,6 +174,19 @@ app.use('/', indexRoutes);
 app.use('/', authRoutes);
 app.use('/', createPostRouter);
 app.use('/', searchRoutes);
+
+// Image upload route
+app.post('/upload-image', upload.single('upload'), (req, res) => {
+    if (req.file) {
+        res.json({
+            uploaded: true,
+            url: `/uploads/${req.file.filename}` // URL to access the uploaded image
+        });
+    } else {
+        res.status(400).json({ uploaded: false, error: { message: 'No file uploaded' } });
+    }
+});
+
 
 // Error handling middleware
 app.use((err, req, res, next) => {

@@ -41,33 +41,84 @@ document.addEventListener('DOMContentLoaded', function() {
     // Disable submit button initially
     submitButton.disabled = true;
 
+    class MyUploadAdapter {
+        constructor(loader) {
+            this.loader = loader;
+        }
+
+        upload() {
+            return this.loader.file
+                .then(file => new Promise((resolve, reject) => {
+                    const data = new FormData();
+                    data.append('upload', file);
+
+                    fetch('/upload-image', {
+                        method: 'POST',
+                        body: data
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.uploaded) {
+                            resolve({ default: result.url });
+                        } else {
+                            reject(result.error.message);
+                        }
+                    })
+                    .catch(error => {
+                        reject('Upload failed');
+                        console.error('Error:', error);
+                    });
+                }));
+        }
+
+        abort() {
+            // Abort the upload process if needed
+        }
+    }
+
+    function MyCustomUploadAdapterPlugin(editor) {
+        editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+            return new MyUploadAdapter(loader);
+        };
+    }
+
     ClassicEditor
-    .create(document.querySelector('#editor'), {
-        toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote'],
-        link: {
-            decorators: {
-                openInNewTab: {
-                    mode: 'manual',
-                    label: 'Open in a new tab',
-                    defaultValue: true,
-                    attributes: {
-                        target: '_blank',
-                        rel: 'noopener noreferrer'
+        .create(document.querySelector('#editor'), {
+            extraPlugins: [MyCustomUploadAdapterPlugin],
+            toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote', '|', 'imageUpload'],
+            link: {
+                decorators: {
+                    openInNewTab: {
+                        mode: 'manual',
+                        label: 'Open in a new tab',
+                        defaultValue: true,
+                        attributes: {
+                            target: '_blank',
+                            rel: 'noopener noreferrer'
+                        }
                     }
                 }
+            },
+            image: {
+                toolbar: ['imageTextAlternative', '|', 'imageStyle:alignLeft', 'imageStyle:full', 'imageStyle:alignRight'],
+                styles: [
+                    'full',
+                    'alignLeft',
+                    'alignRight',
+                ]
             }
-        }
-    })
-    .then(newEditor => {
-        editor = newEditor;
-        isEditorReady = true;
-        submitButton.disabled = false; // Enable submit button when editor is ready
-    })
-    .catch(error => {
-        console.error('CKEditor initialization error:', error);
-        document.getElementById('error-message').textContent = 'Error initializing editor. Please try refreshing the page.';
-    });
-    
+        })
+        .then(newEditor => {
+            editor = newEditor;
+            isEditorReady = true;
+            submitButton.disabled = false; // Enable submit button when editor is ready
+        })
+        .catch(error => {
+            console.error('CKEditor initialization error:', error);
+            document.getElementById('error-message').textContent = 'Error initializing editor. Please try refreshing the page.';
+        });
+
+
     const tagInput = document.getElementById('post-tags');
     const tagsContainer = document.getElementById('tags-container');
 
