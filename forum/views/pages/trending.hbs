@@ -66,17 +66,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const isLoggedIn = {{#if user}}true{{else}}false{{/if}};
     window.isLoggedIn = isLoggedIn; // Make it globally accessible   
     let loading = false;
+    let page = 0; // Ensure the page variable is defined
 
-    // Add click event listeners to post containers
-    const postTitles = document.querySelectorAll('.post-title a');
-    postTitles.forEach(title => {
-        title.addEventListener('click', function(e) {
-            e.preventDefault();
-            const postId = this.closest('.post').getAttribute('data-post-id');
-            window.location.href = `/post/${postId}`;
-        });
-    });
-
+    // Function to load more posts
     function loadMorePosts() {
         if (loading) return;
         loading = true;
@@ -91,6 +83,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         const postElement = document.createElement('article');
                         postElement.className = 'post';
                         postElement.setAttribute('data-post-id', post._id);
+                        postElement.setAttribute('data-vote-score', post.upvotes.length - post.downvotes.length); // Set the initial vote score
                         postElement.innerHTML = `
                             <div class="post-header">
                                 <div class="post-user">
@@ -99,23 +92,25 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <span class="time">${new Date(post.createdAt).toLocaleString()}</span>
                                 </div>
                             </div>
-                            <h2 class="post-title">${post.title}</h2>
+                            <h2 class="post-title"><a href="#">${post.title}</a></h2>
                             <div class="post-content-preview">
                                 ${post.content.substring(0, 150)}...
                             </div>
                             ${post.image ? `<img src="${post.image}" alt="Post image" class="post-image">` : ''}
                             <div class="post-stats">
-                                <span>Upvotes: ${post.upvotes.length}</span>
+                                <span class="upvote-count">Upvotes: ${post.upvotes.length}</span>
                                 <span>Comments: ${post.comments.length}</span>
+                                <button class="upvote-btn" data-post-id="${post._id}">Upvote</button>
+                                <button class="downvote-btn" data-post-id="${post._id}">Downvote</button>
                             </div>
                         `;
                         container.appendChild(postElement);
-                        
-                        // Add click event listener to the new post
-                        postElement.addEventListener('click', function(e) {
-                            if (!e.target.closest('button')) {
-                                window.location.href = `/post/${post._id}`;
-                            }
+
+                        // Add click event listener to the new post title link
+                        const postTitleLink = postElement.querySelector('.post-title a');
+                        postTitleLink.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            window.location.href = `/post/${post._id}`;
                         });
                     });
                     page++;
@@ -137,9 +132,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-});
 
-document.addEventListener('DOMContentLoaded', function() {
     const postsContainer = document.getElementById('posts-container');
 
     function updatePostPosition(postId, newVoteCount) {
@@ -147,11 +140,15 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!postElement) return;
 
         postElement.setAttribute('data-vote-score', newVoteCount);
-        
+
         const posts = Array.from(postsContainer.children);
+        console.log('Posts before sorting:', posts.map(post => post.getAttribute('data-vote-score'))); // Debug log
+
         posts.sort((a, b) => {
             return b.getAttribute('data-vote-score') - a.getAttribute('data-vote-score');
         });
+
+        console.log('Posts after sorting:', posts.map(post => post.getAttribute('data-vote-score'))); // Debug log
 
         posts.forEach(post => postsContainer.appendChild(post));
     }
@@ -162,9 +159,10 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 const postElement = document.querySelector(`[data-post-id="${postId}"]`);
                 const upvoteCount = postElement.querySelector('.upvote-count');
-                upvoteCount.textContent = data.upvotes;
+                upvoteCount.textContent = `Upvotes: ${data.upvotes}`;
 
                 const newVoteScore = data.upvotes - data.downvotes;
+                console.log(`Updated vote score for post ${postId}: ${newVoteScore}`); // Debug log
                 updatePostPosition(postId, newVoteScore);
             })
             .catch(error => console.error('Error:', error));
@@ -178,5 +176,16 @@ document.addEventListener('DOMContentLoaded', function() {
             handleVote(postId, voteType);
         }
     });
+
+    // Add click event listeners to post containers
+    const postTitles = document.querySelectorAll('.post-title a');
+    postTitles.forEach(title => {
+        title.addEventListener('click', function(e) {
+            e.preventDefault();
+            const postId = this.closest('.post').getAttribute('data-post-id');
+            window.location.href = `/post/${postId}`;
+        });
+    });
 });
+
 </script>

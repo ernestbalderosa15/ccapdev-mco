@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema({
   country: { type: String, default: '' },
   aboutMe: { type: String, default: '' },
   postCount: { type: Number, default: 0 },
+  posts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
   comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
   friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   upvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
