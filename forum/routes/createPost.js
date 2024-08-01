@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Post = require('../models/Post');
 const sanitizeHtml = require('sanitize-html');
+const User = require('../models/User');
 
 // Middleware to check if user is authenticated
 const isAuthenticated = (req, res, next) => {

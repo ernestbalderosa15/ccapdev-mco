@@ -19,7 +19,7 @@ const app = express();
 
 // Environment variables
 const dbName = process.env.DB_NAME || 'Forum';
-const mongoURI = process.env.MONGODB_URI || `mongodb://localhost:27017/${dbName}`;
+const mongoURI = "mongodb+srv://ernestbalderosa:pAuGvXMwMsmYkQeL@cluster0.hhgoid5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 const sessionSecret = process.env.SESSION_SECRET || 'ccapdev-secret-key';
 const PORT = process.env.PORT || 3000;
 

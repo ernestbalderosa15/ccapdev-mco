@@ -21,7 +21,7 @@
         <div class="form-group">
             <label for="profile-picture">Profile Picture</label>
             <input type="file" id="profile-picture" name="profilePicture" class="form-input" accept="image/*">
-            <img id="profile-picture-preview" src="{{user.profilePicture}}" alt="Profile Picture Preview" style="max-width: 200px; margin-top: 10px;">
+            <img id="profile-picture-preview" src="{{#if user.profilePictureUrl}}{{user.profilePictureUrl}}{{else}}/images/default-avatar.jpg{{/if}}" alt="Profile Picture Preview" style="max-width: 200px; margin-top: 10px;">
         </div>
         <div class="form-group">
             <label for="about-me">About Me</label>
@@ -107,29 +107,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Form submission
     settingsForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const formData = new FormData(this);
+    e.preventDefault();
+    const formData = new FormData(this);
 
-        // Add tags to formData
-        const tags = Array.from(tagsContainer.children).map(tag => tag.dataset.tag);
-        formData.append('tags', JSON.stringify(tags));
+    // Add tags to formData
+    const tags = Array.from(tagsContainer.children).map(tag => tag.dataset.tag);
+    formData.append('tags', JSON.stringify(tags));
 
-        try {
-            const response = await fetch('/profile/update', {
-                method: 'POST',
-                body: formData
-            });
+    try {
+        const response = await fetch('/profile/update', {
+            method: 'POST',
+            body: formData
+        });
 
-            if (!response.ok) throw new Error('Failed to update profile');
+        const result = await response.json();
 
-            const result = await response.json();
-            alert('Profile updated successfully!');
-            // Optionally, redirect to profile page or refresh the current page
-            // window.location.href = '/profile';
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Failed to update profile. Please try again.');
-        }
-    });
+        if (!result.success) throw new Error(result.message);
+
+        // Display success message
+        alert(result.message);
+        // Optionally, redirect to profile page or refresh the current page
+        // window.location.href = '/profile';
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to update profile. Please try again.');
+    }
+});
+
+
 });
 </script>

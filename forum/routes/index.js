@@ -10,6 +10,8 @@ const Post = require('../models/Post');
 const Comment = require('../models/Comment');
 const { router: authRouter, authMiddleware } = require('./authRoutes');
 const sanitizeHtml = require('sanitize-html');
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' }); // Configure multer for file uploads
 
 // Use authentication routes
 router.use('/', authRouter);
@@ -28,8 +30,6 @@ const isAuthenticated = (req, res, next) => {
     }
 };
 
-
-
 // Home route
 router.get('/', (req, res, next) => {
     res.setHeader('Cache-Control', 'no-store, max-age=0');
@@ -43,21 +43,21 @@ router.get('/', (req, res, next) => {
         const limit = isLoggedIn ? 0 : 15;
 
         const posts = await Post.find()
-            .populate('user', 'username profilePicture') 
+            .populate('user', 'username profilePicture')
             .populate('comments')
             .sort('-createdAt')
             .limit(limit)
             .lean({ virtuals: true });
 
-            if (isLoggedIn && req.user._id) {
-                const userId = req.user._id.toString();
-                const userBookmarks = req.user.bookmarkedPosts ? req.user.bookmarkedPosts.map(id => id.toString()) : [];
-                posts.forEach(post => {
-                    post.userVote = (post.upvotes && post.upvotes.some(id => id.toString() === userId)) ? 'upvote' : 
-                                    (post.downvotes && post.downvotes.some(id => id.toString() === userId)) ? 'downvote' : null;
-                    post.isBookmarked = userBookmarks.includes(post._id.toString());
-                });
-            }
+        if (isLoggedIn && req.user._id) {
+            const userId = req.user._id.toString();
+            const userBookmarks = req.user.bookmarkedPosts ? req.user.bookmarkedPosts.map(id => id.toString()) : [];
+            posts.forEach(post => {
+                post.userVote = (post.upvotes && post.upvotes.some(id => id.toString() === userId)) ? 'upvote' : 
+                                (post.downvotes && post.downvotes.some(id => id.toString() === userId)) ? 'downvote' : null;
+                post.isBookmarked = userBookmarks.includes(post._id.toString());
+            });
+        }
 
         res.render('pages/home', { 
             title: 'Home', 
@@ -77,10 +77,10 @@ router.get('/post/:id', async (req, res) => {
     try {
         console.log('Fetching post with ID:', req.params.id);
         const post = await Post.findById(req.params.id)
-        .populate({
-            path: 'user',
-            select: 'username profilePicture profilePictureUrl'
-        })
+            .populate({
+                path: 'user',
+                select: 'username profilePicture profilePictureUrl'
+            })
             .populate({
                 path: 'comments',
                 populate: [
@@ -148,8 +148,8 @@ router.get('/post/:id', async (req, res) => {
         });
     }
 });
+
 // My Interests route
- 
 router.get('/my-interests', isAuthenticated, (req, res) => {
     res.render('my-interests', { title: 'My Interests', user: req.user });
 });
@@ -162,7 +162,7 @@ router.get('/saved', isAuthenticated, async (req, res) => {
                 path: 'bookmarkedPosts',
                 populate: { path: 'user', select: 'username profilePicture' }
             })
-        .lean();
+            .lean();
 
         const posts = user.bookmarkedPosts.map(post => ({
             ...post,
@@ -220,7 +220,6 @@ router.get('/profile/:username?', async (req, res) => {
     }
 });
 
-
 // Settings
 router.get('/settings', isAuthenticated, (req, res) => {
     res.render('settings', { title: 'Settings', user: req.user });
@@ -244,227 +243,81 @@ router.get('/edit-post/:id', isAuthenticated, async (req, res) => {
             return res.status(403).render('error', { title: 'Forbidden', message: 'You are not authorized to edit this post', user: req.user });
         }
 
-        res.render('edit-post', { title: 'Edit Post', post, user: req.user, postContent: post.content });
+        res.render('edit-post', { title: 'Edit Post', post, user: req.user });
     } catch (error) {
-        console.error('Error fetching post for editing:', error);
-        res.status(500).render('error', { title: 'Server Error', message: 'Error fetching post', user: req.user });
+        console.error('Error fetching post for edit:', error);
+        res.status(500).render('error', { title: 'Server Error', message: 'Error fetching post for editing' });
     }
 });
 
-// Update post after edit
-router.post('/edit-post/:id', isAuthenticated, async (req, res) => {
+// Update post route
+router.post('/update-post/:id', isAuthenticated, async (req, res) => {
     try {
         const post = await Post.findById(req.params.id);
         if (!post) {
-            return res.status(404).json({ error: 'Post not found' });
+            return res.status(404).render('error', { title: 'Not Found', message: 'Post not found', user: req.user });
         }
-        if (post.user.toString() !== req.user._id.toString()) {
-            return res.status(403).json({ error: 'Not authorized to edit this post' });
+
+        if (!isAuthorized(post, req.user)) {
+            return res.status(403).render('error', { title: 'Forbidden', message: 'You are not authorized to update this post', user: req.user });
         }
 
         post.title = req.body.title;
         post.content = req.body.content;
-        post.tags = req.body.tags;
-
         await post.save();
 
-        res.json({ success: true, _id: post._id });
+        res.redirect(`/post/${post._id}`);
     } catch (error) {
         console.error('Error updating post:', error);
-        res.status(500).json({ error: 'Error updating post' });
+        res.status(500).render('error', { title: 'Server Error', message: 'Error updating post' });
     }
 });
 
-// Delete post
-router.delete('/delete-post/:id', authMiddleware, async (req, res) => {
+// Update user profile route
+// Update user profile route
+router.post('/profile/update', isAuthenticated, upload.single('profilePicture'), async (req, res) => {
     try {
-        const post = await Post.findById(req.params.id).populate('user', 'username _id');
+        const { username, email, country, aboutMe, currentPassword, newPassword, confirmNewPassword, tags } = req.body;
+        const user = await User.findById(req.user._id);
 
-        if (!post) {
-            return res.status(404).json({ error: 'Post not found' });
+        if (!user) {
+            return res.status(404).render('error', { title: 'Not Found', message: 'User not found', user: req.user });
         }
 
-        if (!isAuthorized(post, req.user)) {
-            return res.status(403).json({ error: 'You are not authorized to delete this post' });
-        }
-
-        await Post.findByIdAndDelete(req.params.id);
-        res.status(200).json({ success: true, message: 'Post deleted successfully' });
-    } catch (error) {
-        console.error('Error deleting post:', error);
-        res.status(500).json({ error: 'Error deleting post' });
-    }
-});
-
-// Upvote a post
-router.post('/post/:id/upvote', authMiddleware, async (req, res) => {
-    try {
-        const post = await Post.findById(req.params.id);
-        if (!post) {
-            return res.status(404).json({ error: 'Post not found' });
-        }
-
-        const userId = req.user._id;
-        const hasUpvoted = post.upvotes.includes(userId);
-        const hasDownvoted = post.downvotes.includes(userId);
-
-        if (hasUpvoted) {
-            // Remove upvote
-            post.upvotes.pull(userId);
-        } else {
-            // Add upvote
-            post.upvotes.addToSet(userId);
-            // Remove downvote if exists
-            if (hasDownvoted) {
-                post.downvotes.pull(userId);
+        if (currentPassword && newPassword) {
+            const isMatch = await user.comparePassword(currentPassword);
+            if (!isMatch) {
+                return res.status(400).render('settings', { title: 'Settings', user: req.user, error: 'Current password is incorrect' });
             }
-        }
 
-        await post.save();
-
-        // Update user's upvotes
-        await User.findByIdAndUpdate(userId, {
-            $addToSet: { upvotes: post._id },
-            $pull: { downvotes: post._id }
-        });
-
-        res.json({ 
-            upvotes: post.upvotes.length, 
-            downvotes: post.downvotes.length,
-            userVote: hasUpvoted ? null : 'upvote'
-        });
-    } catch (error) {
-        console.error('Error upvoting post:', error);
-        res.status(500).json({ error: 'Error upvoting post' });
-    }
-});
-
-// Downvote a post
-router.post('/post/:id/downvote', authMiddleware, async (req, res) => {
-    try {
-        const post = await Post.findById(req.params.id);
-        if (!post) {
-            return res.status(404).json({ error: 'Post not found' });
-        }
-
-        const userId = req.user._id;
-        const hasUpvoted = post.upvotes.includes(userId);
-        const hasDownvoted = post.downvotes.includes(userId);
-
-        if (hasDownvoted) {
-            // Remove downvote
-            post.downvotes.pull(userId);
-        } else {
-            // Add downvote
-            post.downvotes.addToSet(userId);
-            // Remove upvote if exists
-            if (hasUpvoted) {
-                post.upvotes.pull(userId);
+            if (newPassword !== confirmNewPassword) {
+                return res.status(400).render('settings', { title: 'Settings', user: req.user, error: 'New passwords do not match' });
             }
+
+            user.password = await User.hashPassword(newPassword);
         }
 
-        await post.save();
-        res.json({ 
-            upvotes: post.upvotes.length, 
-            downvotes: post.downvotes.length,
-            userVote: hasDownvoted ? null : 'downvote'
-        });
-    } catch (error) {
-        console.error('Error downvoting post:', error);
-        res.status(500).json({ error: 'Error downvoting post' });
-    }
-});
+        if (req.file) {
+            user.profilePicture = req.file.path;
+        }
+        
+        user.username = username || user.username;
+        user.email = email || user.email;
+        user.country = country || user.country;
+        user.aboutMe = aboutMe || user.aboutMe;
 
-// Book a post
-router.post('/post/:id/bookmark', isAuthenticated, async (req, res) => {
-    try {
-        const postId = req.params.id;
-        const userId = req.user._id;
-
-        const user = await User.findById(userId);
-        const isBookmarked = user.bookmarkedPosts.includes(postId);
-
-        if (isBookmarked) {
-            // Remove bookmark
-            user.bookmarkedPosts.pull(postId);
-        } else {
-            // Add bookmark
-            user.bookmarkedPosts.push(postId);
+        if (tags) {
+            user.savedTags = JSON.parse(tags); // Update savedTags
         }
 
         await user.save();
 
-        res.json({ 
-            isBookmarked: !isBookmarked,
-            message: isBookmarked ? 'Post unbookmarked' : 'Post bookmarked'
-        });
+        res.json({ success: true, message: 'Profile updated successfully!' });
     } catch (error) {
-        console.error('Error bookmarking post:', error);
-        res.status(500).json({ error: 'Error bookmarking post' });
+        console.error('Error updating profile:', error);
+        res.status(500).json({ success: false, message: 'Failed to update profile. Please try again.' });
     }
 });
 
-// Trending route
-router.get('/trending', async (req, res) => {
-    try {
-        const isLoggedIn = !!req.user;
-
-        const posts = await Post.aggregate([
-            {
-                $addFields: {
-                    upvoteCount: { $size: { $ifNull: ["$upvotes", []] } }
-                }
-            },
-            { $sort: { upvoteCount: -1, createdAt: -1 } }
-        ]).exec();
-
-        const populatedPosts = await Post.populate(posts, [
-            { path: 'user', select: 'username profilePicture' },
-            { path: 'comments' }
-        ]);
-        
-
-        if (isLoggedIn && req.user._id) {
-            const userId = req.user._id.toString();
-            const userBookmarks = req.user.bookmarkedPosts ? req.user.bookmarkedPosts.map(id => id.toString()) : [];
-            populatedPosts.forEach(post => {
-                post.userVote = (post.upvotes && post.upvotes.some(id => id.toString() === userId)) ? 'upvote' : 
-                                (post.downvotes && post.downvotes.some(id => id.toString() === userId)) ? 'downvote' : null;
-                post.isBookmarked = userBookmarks.includes(post._id.toString());
-            });
-        }
-
-        res.render('pages/trending', { 
-            title: 'Trending', 
-            posts: populatedPosts,
-            isLoggedIn,
-            user: req.user
-        });
-    } catch (error) {
-        console.error('Error fetching trending posts:', error);
-        res.status(500).render('pages/error', { title: 'Server Error', message: 'Error fetching trending posts' });
-    }
-});
-
-// Trending api 
-router.get('/api/trending', async (req, res) => {
-    try {
-        const page = Math.max(1, parseInt(req.query.page) || 1);
-        const limit = 15;
-        const skip = (page - 1) * limit;
-
-        const posts = await Post.find()
-            .populate('user', 'username profilePicture')
-            .populate('comments')
-            .sort('-upvotes.length') // Sort by number of upvotes in descending order
-            .skip(skip)
-            .limit(limit);
-
-        res.json(posts);
-    } catch (error) {
-        console.error('Error fetching trending posts for API:', error);
-        res.status(500).json({ error: 'Error fetching trending posts' });
-    }
-});
 
 module.exports = router;
