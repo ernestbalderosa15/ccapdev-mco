@@ -26,6 +26,15 @@ router.post('/create-post', isAuthenticated, async (req, res) => {
         // Ensure tags is an array
         const tagArray = Array.isArray(tags) ? tags : [];
 
+        // Extract image URLs from the content
+        const imageRegex = /<img[^>]+src="?([^"\s]+)"?\s*/gi;
+        let match;
+        let imageUrl = null;
+        while ((match = imageRegex.exec(content)) !== null) {
+            imageUrl = match[1];
+            break; // We'll just use the first image found
+        }
+
         // Sanitize the HTML content
         const sanitizedContent = sanitizeHtml(content, {
             allowedTags: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li'],
@@ -37,11 +46,18 @@ router.post('/create-post', isAuthenticated, async (req, res) => {
             user: req.user.id, // Use the user id from the session
             title: title,
             content: sanitizedContent,
-            tags: tagArray
+            tags: tagArray,
+            image: imageUrl // Save the image URL
         });
-
         // Save the post to the database
         await newPost.save();
+
+        // Update user's posts array and increment post count
+        await User.findByIdAndUpdate(req.user._id, {
+            $push: { posts: newPost._id },
+            $inc: { postCount: 1 }
+        });
+
 
         res.status(200).json({ success: true, _id: newPost._id });
     } catch (error) {

@@ -77,7 +77,10 @@ router.get('/post/:id', async (req, res) => {
     try {
         console.log('Fetching post with ID:', req.params.id);
         const post = await Post.findById(req.params.id)
-            .populate('user', 'username profilePicture')
+        .populate({
+            path: 'user',
+            select: 'username profilePicture profilePictureUrl'
+        })
             .populate({
                 path: 'comments',
                 populate: [
@@ -232,7 +235,7 @@ function isAuthorized(post, user) {
 // Edit post route
 router.get('/edit-post/:id', isAuthenticated, async (req, res) => {
     try {
-        const post = await Post.findById(req.params.id).populate('user', 'username _id');
+        const post = await Post.findById(req.params.id).lean();
         if (!post) {
             return res.status(404).render('error', { title: 'Not Found', message: 'Post not found', user: req.user });
         }
@@ -241,7 +244,7 @@ router.get('/edit-post/:id', isAuthenticated, async (req, res) => {
             return res.status(403).render('error', { title: 'Forbidden', message: 'You are not authorized to edit this post', user: req.user });
         }
 
-        res.render('edit-post', { title: 'Edit Post', post, user: req.user });
+        res.render('edit-post', { title: 'Edit Post', post, user: req.user, postContent: post.content });
     } catch (error) {
         console.error('Error fetching post for editing:', error);
         res.status(500).render('error', { title: 'Server Error', message: 'Error fetching post', user: req.user });

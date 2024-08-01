@@ -7,7 +7,7 @@
     <div class="post full-post">
         <div class="post-header">
             <div class="post-user">
-                <img src="{{post.user.profilePicture}}" alt="{{post.user.username}}" class="avatar small" onerror="handleImageError(this)">
+<img src="{{#if post.user.profilePictureUrl}}{{post.user.profilePictureUrl}}{{else}}{{#if post.user.profilePicture}}{{post.user.profilePicture}}{{else}}/images/default-avatar.jpg{{/if}}{{/if}}" alt="{{post.user.username}}" class="avatar small" onerror="handleImageError(this)">
                 <span class="username">{{post.user.username}}</span>
                 <span class="time">{{formatDate post.createdAt}}</span>
             </div>
@@ -24,7 +24,7 @@
     </div>
         <h2 class="post-title">{{post.title}}</h2>
         {{#if post.image}}
-        <img src="{{post.image}}" alt="Post image" class="post-image">
+    <img src="{{post.image}}" alt="Post image" class="post-image" onerror="this.style.display='none'">
         {{/if}}
     <div class="post-content">
         {{{post.content}}}
@@ -131,6 +131,12 @@
 </article>
 
 <script>
+window.handleImageError = function(img) {
+    img.onerror = null; // Prevent infinite loop
+    img.src = '/images/default-avatar.jpg';
+    console.log('Fallback image set for profile picture');
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const deleteButton = document.querySelector('.delete-post');
     if (deleteButton) {
@@ -157,6 +163,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
         });
+    }
+});
+
+function handleImageError(img) {
+    img.onerror = null; // Prevent infinite loop
+    img.src = '/images/default-avatar.jpg';
+    console.log('Fallback image set for profile picture');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle post image error
+    const postImage = document.querySelector('.post-image');
+    if (postImage) {
+        postImage.onerror = function() {
+            console.log('Failed to load post image');
+            this.style.display = 'none';
+        };
     }
 });
 </script>
