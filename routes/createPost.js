@@ -15,8 +15,23 @@ const isAuthenticated = (req, res, next) => {
 };
 
 // Route to render the create post form
-router.get('/create-post', isAuthenticated, (req, res) => {
-    res.render('create-post', { title: 'Create Post', user: req.user });
+router.get('/create-post', isAuthenticated, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id)
+            .select('username profilePicture savedTags postCount')
+            .lean();
+
+        user.profilePictureUrl = user.profilePicture || '/images/default-avatar.jpg';
+
+        res.render('create-post', { 
+            title: 'Create Post', 
+            user: user,
+            isLoggedIn: true
+        });
+    } catch (error) {
+        console.error('Error fetching user data for create post:', error);
+        res.status(500).render('error', { message: 'Error fetching user data for create post' });
+    }
 });
 
 // Route to handle post creation
@@ -53,21 +68,30 @@ router.post('/create-post', isAuthenticated, async (req, res) => {
         // Save the post to the database
         await newPost.save();
 
-        // Update user's posts array and increment post count
-        const updatedUser = await User.findByIdAndUpdate(
-            req.user._id,
-            {
-                $push: { posts: newPost._id },
-                $inc: { postCount: 1 }
-            },
-            { new: true }
-        );
+       // Update user's posts array and increment post count
+       const updatedUser = await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $push: { posts: newPost._id },
+            $inc: { postCount: 1 }
+        },
+        { new: true }
+    ).select('username profilePicture savedTags postCount');
 
-
-        res.status(200).json({ success: true, _id: newPost._id });
-    } catch (error) {
-        console.error('Error creating post:', error);
-        res.status(500).json({ error: 'Error creating post', details: error.message });
-    }
+    res.status(200).json({ 
+        success: true, 
+        _id: newPost._id,
+        user: {
+            username: updatedUser.username,
+            profilePictureUrl: updatedUser.profilePicture || '/images/default-avatar.jpg',
+            savedTags: updatedUser.savedTags,
+            postCount: updatedUser.postCount
+        }
+    });
+} catch (error) {
+    console.error('Error creating post:', error);
+    res.status(500).json({ error: 'Error creating post', details: error.message });
+}
 });
+
 module.exports = router;

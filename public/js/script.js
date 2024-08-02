@@ -590,3 +590,40 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+
+document.addEventListener('DOMContentLoaded', function() {
+    const addFriendBtn = document.getElementById('addFriendBtn');
+    if (addFriendBtn) {
+        addFriendBtn.addEventListener('click', addFriend);
+    }
+});
+
+async function addFriend() {
+    const friendId = this.dataset.friendId;
+    try {
+        const response = await fetch('/add-friend', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ friendId }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            // Friend added successfully
+            this.textContent = 'Friends';
+            this.disabled = true;
+            alert('Friend added successfully!');
+            location.reload(); // Refresh the page to show updated friend list
+        } else {
+            // Handle errors
+            console.error('Error adding friend:', data.message);
+            alert(data.message);
+        }
+    } catch (error) {
+        console.error('Error adding friend:', error);
+        alert('An error occurred while adding friend');
+    }
+}

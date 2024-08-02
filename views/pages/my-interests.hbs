@@ -1,42 +1,61 @@
 {{!-- pages/my-interests.hbs --}}
 
 <div class="my-interests">
-{{#each posts}}
-<article class="post">
-    <div class="post-header">
-        <div class="post-user">
-            <img src="https://i.pravatar.cc/150?img={{this.avatarId}}" alt="{{this.user}}" class="avatar small">
-            <span class="username">{{this.user}}</span>
-            <span class="time">{{this.time}}</span>
-        </div>
-        <div class="post-actions">
-            <button class="post-menu"><span class="material-icons">more_vert</span></button>
-            <div class="post-menu-content">
-                <a href="#" class="edit-post" data-post-id="{{post.id}}">Edit</a>                        <a href="#" class="share-comment">Share</a>
-                <a href="#">Delete</a>
+    {{#if posts.length}}
+        {{#each posts}}
+        <article class="post" data-post-id="{{this._id}}">
+            <div class="post-header">
+                <div class="post-user">
+                    <img src="{{this.user.profilePicture}}" alt="{{this.user.username}}" class="avatar small" onerror="handleImageError(this)">
+                    <span class="username">{{this.user.username}}</span>
+                    <span class="time">{{formatDate this.createdAt}}</span>
+                </div>
             </div>
-        </div>
-    </div>
-    <h2 class="post-title">{{this.title}}</h2>
-    {{#if this.image}}
-    <img src="{{this.image}}" alt="Post image" class="post-image">
-    {{/if}}
-    <div class="post-tags">
-        {{#each this.tags}}
-        <span class="tag">{{this}}</span>
+            <h2 class="post-title"><a href="/post/{{this._id}}">{{this.title}}</a></h2>
+            <div class="post-content-preview">
+                {{{truncateHtml this.content 150}}}
+            </div>
+            {{#if this.image}}
+            <img src="{{this.image}}" alt="Post image" class="post-image">
+            {{/if}}
+            <div class="post-tags">
+                {{#each this.tags}}
+                <a href="/search?tag={{this}}" class="tag">{{this}}</a>
+                {{/each}}
+            </div>
+            <div class="post-stats">
+                <div class="post-stats-left">
+                    <button class="btn-icon upvote-btn {{#if (eq this.userVote 'upvote')}}active{{/if}}" data-post-id="{{this._id}}">
+                        <span class="material-icons">arrow_upward</span> 
+                        <span class="upvote-count">{{this.upvotes.length}}</span>
+                    </button>
+                    <button class="btn-icon downvote-btn {{#if (eq this.userVote 'downvote')}}active{{/if}}" data-post-id="{{this._id}}">
+                        <span class="material-icons">arrow_downward</span>
+                    </button>
+                    <button class="btn-icon">
+                        <span class="material-icons">comment</span> 
+                        {{this.comments.length}}
+                    </button>
+                </div>
+                <div class="post-stats-right">
+                    <button class="btn-icon bookmark-btn {{#if this.isBookmarked}}active{{/if}}" data-post-id="{{this._id}}">
+                        <span class="material-icons">bookmark</span>
+                    </button>
+                    <button class="btn-icon share-btn" data-post-id="{{this._id}}">
+                        <span class="material-icons">share</span>
+                    </button>
+                </div>
+            </div>
+        </article>
         {{/each}}
-    </div>
-    <div class="post-stats">
-        <div class="post-stats-left">
-            <button class="btn-icon"><span class="material-icons">arrow_upward</span> {{this.upvotes}}</button>
-            <button class="btn-icon"><span class="material-icons">arrow_downward</span></button>
-            <button class="btn-icon"><span class="material-icons">comment</span> {{this.comments}}</button>
-        </div>
-        <div class="post-stats-right">
-            <button class="btn-icon"><span class="material-icons">bookmark</span></button>
-            <button class="btn-icon"><span class="material-icons">share</span></button>
-        </div>
-    </div>
-</article>
-    {{/each}}
+    {{else}}
+        <p>No posts matching your interests found. Try saving some tags in your profile settings!</p>
+    {{/if}}
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initializeVoting();
+    initializeBookmarking();
+});
+</script>

@@ -66,11 +66,11 @@
             </button>
         </div>
 
-        <div class="comments-list">
-            {{#each post.comments}}
-            {{> commentbody}}
-            {{/each}}
-        </div>
+    <div class="comments-list">
+        {{#each post.comments}}
+            {{> commentbody comment=this user=../user}}
+        {{/each}}
+    </div>
     </div>
 </div>
 </article>
@@ -127,4 +127,5 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 </script>

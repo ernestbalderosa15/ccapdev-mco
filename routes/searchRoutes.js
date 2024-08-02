@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Post = require('../models/Post');
+const User = require('../models/User');
 
 router.get('/search', async (req, res) => {
     res.setHeader('Cache-Control', 'no-store, max-age=0');
@@ -29,17 +30,29 @@ router.get('/search', async (req, res) => {
 
         const results = await Post.find(searchCriteria)
             .populate('user', 'username profilePicture')
+            .populate('comments')
             .sort('-createdAt')
             .limit(20)
             .lean();
 
+        let user = null;
         if (isLoggedIn && req.user) {
+            user = await User.findById(req.user._id)
+                .populate('posts')
+                .select('username profilePicture savedTags posts bookmarkedPosts')
+                .lean();
+
+            user.numberOfPosts = user.posts ? user.posts.length : 0;
+            delete user.posts;
+
+            user.profilePictureUrl = user.profilePicture || '/images/default-avatar.jpg';
+
             const userId = req.user._id.toString();
-            const userBookmarks = req.user.bookmarkedPosts || [];
+            const userBookmarks = user.bookmarkedPosts ? user.bookmarkedPosts.map(id => id.toString()) : [];
             results.forEach(post => {
-                post.userVote = post.upvotes && post.upvotes.includes(userId) ? 'upvote' : 
-                                post.downvotes && post.downvotes.includes(userId) ? 'downvote' : null;
-                post.isBookmarked = userBookmarks.some(id => id.toString() === post._id.toString());
+                post.userVote = (post.upvotes && post.upvotes.some(id => id.toString() === userId)) ? 'upvote' : 
+                                (post.downvotes && post.downvotes.some(id => id.toString() === userId)) ? 'downvote' : null;
+                post.isBookmarked = userBookmarks.includes(post._id.toString());
             });
         } else {
             results.forEach(post => {
@@ -53,7 +66,7 @@ router.get('/search', async (req, res) => {
             query: query || tag, 
             searchType,
             isLoggedIn,
-            user: req.user
+            user: user
         });
     } catch (error) {
         console.error('Search error:', error);

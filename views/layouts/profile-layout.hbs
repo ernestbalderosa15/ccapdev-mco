@@ -21,7 +21,7 @@
                 <div class="profile-box">
                     <img src="{{user.profilePicture}}" alt="{{user.username}}" class="avatar">
                     <h2>{{user.username}}</h2>
-                    <p>Posts: {{user.numberOfPosts}}</p>
+                    <p>Posts: {{user.postCount}}</p>
                     {{#unless isOwnProfile}}
                         <button class="btn-add-friend" id="addFriendBtn" data-friend-id="{{user._id}}">Add Friend</button>
                     {{/unless}}

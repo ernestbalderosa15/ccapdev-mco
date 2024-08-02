@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.key === 'Enter') {
             e.preventDefault();
             const tag = this.value.trim();
-            if (tag) {
+            if (tag && !tagExists(tag)) {
                 addTag(tag);
                 this.value = '';
             }
@@ -103,6 +103,11 @@ document.addEventListener('DOMContentLoaded', function() {
         tagElement.dataset.tag = tag;
         tagElement.innerHTML = `${tag} <span class="material-icons remove-tag">close</span>`;
         tagsContainer.appendChild(tagElement);
+    }
+
+    // Check if tag already exists
+    function tagExists(tag) {
+        return Array.from(tagsContainer.children).some(tagElement => tagElement.dataset.tag.toLowerCase() === tag.toLowerCase());
     }
 
     // Form submission

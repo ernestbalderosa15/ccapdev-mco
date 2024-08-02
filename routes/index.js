@@ -51,44 +51,54 @@ router.get('/', (req, res, next) => {
             .limit(limit)
             .lean({ virtuals: true });
 
-            if (isLoggedIn && req.user._id) {
-                const userId = req.user._id.toString();
-                const userBookmarks = req.user.bookmarkedPosts ? req.user.bookmarkedPosts.map(id => id.toString()) : [];
-                posts.forEach(post => {
-                    post.userVote = (post.upvotes && post.upvotes.some(id => id.toString() === userId)) ? 'upvote' : 
-                                    (post.downvotes && post.downvotes.some(id => id.toString() === userId)) ? 'downvote' : null;
-                    post.isBookmarked = userBookmarks.includes(post._id.toString());
-                });
-            }
-
-        let user = null;
-        if (req.user) {
-            user = await User.findById(req.user._id).select('username profilePicture numberOfPosts savedTags');
+        if (isLoggedIn && req.user._id) {
+            const userId = req.user._id.toString();
+            const user = await User.findById(userId).select('bookmarkedPosts').lean();
+            const userBookmarks = user.bookmarkedPosts ? user.bookmarkedPosts.map(id => id.toString()) : [];
+            
+            posts.forEach(post => {
+                post.userVote = (post.upvotes && post.upvotes.some(id => id.toString() === userId)) ? 'upvote' : 
+                                (post.downvotes && post.downvotes.some(id => id.toString() === userId)) ? 'downvote' : null;
+                post.isBookmarked = userBookmarks.includes(post._id.toString());
+            });
         }
 
-        res.render('pages/home', { 
-            title: 'Home', 
-            posts,
-            isLoggedIn,
-            user: user  
-        });
-        console.log('Rendered home page with user:', user);
-    } catch (error) {
-        console.error('Error fetching posts:', error);
-        res.status(500).render('pages/error', { title: 'Server Error', message: 'Error fetching posts' });
-    }
-});
-
+            let user = null;
+            if (req.user) {
+                user = await User.findById(req.user._id)
+                    .populate('posts')
+                    .select('username profilePicture savedTags posts')
+                    .lean();
+    
+                user.numberOfPosts = user.posts ? user.posts.length : 0;
+                
+                delete user.posts;
+    
+                user.profilePictureUrl = user.profilePicture || '/images/default-avatar.jpg';
+            }
+    
+            res.render('pages/home', { 
+                title: 'Home', 
+                posts,
+                isLoggedIn,
+                user: user  
+            });
+            console.log('Rendered home page with user:', user);
+        } catch (error) {
+            console.error('Error fetching posts:', error);
+            res.status(500).render('pages/error', { title: 'Server Error', message: 'Error fetching posts' });
+        }
+    });
 
 // Post route
 router.get('/post/:id', async (req, res) => {
     try {
         console.log('Fetching post with ID:', req.params.id);
         const post = await Post.findById(req.params.id)
-        .populate({
-            path: 'user',
-            select: 'username profilePicture profilePictureUrl'
-        })
+            .populate({
+                path: 'user',
+                select: 'username profilePicture profilePictureUrl'
+            })
             .populate({
                 path: 'comments',
                 populate: [
@@ -118,12 +128,17 @@ router.get('/post/:id', async (req, res) => {
         console.log('Is user logged in:', isLoggedIn);
         
         let isAuthor = false;
+        let currentUser = null;
         
         if (isLoggedIn) {
             console.log('Logged in user ID:', req.user._id);
             const userId = req.user._id.toString();
-            const userBookmarks = req.user.bookmarkedPosts ? req.user.bookmarkedPosts.map(id => id.toString()) : [];
-            
+            currentUser = await User.findById(userId)
+                .select('username email profilePicture savedTags')
+                .lean();
+
+            const userPosts = await Post.countDocuments({ user: userId });
+
             if (post.upvotes && Array.isArray(post.upvotes)) {
                 post.userVote = post.upvotes.some(id => id.toString() === userId) ? 'upvote' : 
                                 (post.downvotes && Array.isArray(post.downvotes) && post.downvotes.some(id => id.toString() === userId)) ? 'downvote' : null;
@@ -132,18 +147,24 @@ router.get('/post/:id', async (req, res) => {
                 post.userVote = null;
             }
             
-            post.isBookmarked = userBookmarks.includes(post._id.toString());
+            const userBookmarks = await User.findById(userId).select('bookmarkedPosts').lean();
+            post.isBookmarked = userBookmarks.bookmarkedPosts.some(id => id.toString() === post._id.toString());
             isAuthor = post.user && post.user._id && (post.user._id.toString() === userId);
+
+            // Add user details
+            currentUser.numberOfPosts = userPosts;
+            currentUser.profilePictureUrl = currentUser.profilePicture || '/images/default-avatar.jpg';
         } else {
             post.userVote = null;
             post.isBookmarked = false;
         }
 
+        console.log('Current user:', currentUser);
         console.log('Rendering post page');
         res.render('pages/post', { 
             title: post.title, 
             post,
-            user: req.user,
+            user: currentUser,
             isAuthor,
             isLoggedIn
         });
@@ -156,10 +177,45 @@ router.get('/post/:id', async (req, res) => {
         });
     }
 });
-// My Interests route
  
-router.get('/my-interests', isAuthenticated, (req, res) => {
-    res.render('my-interests', { title: 'My Interests', user: req.user });
+// My Interests route
+router.get('/my-interests', isAuthenticated, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id)
+            .populate('posts')
+            .select('username profilePicture savedTags posts bookmarkedPosts')
+            .lean();
+
+        user.numberOfPosts = user.posts ? user.posts.length : 0;
+        delete user.posts;
+
+        user.profilePictureUrl = user.profilePicture || '/images/default-avatar.jpg';
+
+        const posts = await Post.find({ tags: { $in: user.savedTags } })
+            .populate('user', 'username profilePicture')
+            .populate('comments')
+            .sort('-createdAt')
+            .lean();
+
+        const userBookmarks = user.bookmarkedPosts ? user.bookmarkedPosts.map(id => id.toString()) : [];
+        const userId = req.user._id.toString();
+
+        posts.forEach(post => {
+            post.isBookmarked = userBookmarks.includes(post._id.toString());
+            post.userVote = post.upvotes.some(id => id.toString() === userId) ? 'upvote' : 
+                            post.downvotes.some(id => id.toString() === userId) ? 'downvote' : null;
+        });
+
+        res.render('my-interests', { 
+            title: 'My Interests',
+            posts, 
+            user: user,
+            isLoggedIn: true
+        });
+    } catch (error) {
+        console.error('Error fetching posts for My Interests:', error);
+        res.status(500).render('error', { message: 'Error fetching posts for My Interests' });
+    }
 });
 
 // Saved Pages route
@@ -170,7 +226,14 @@ router.get('/saved', isAuthenticated, async (req, res) => {
                 path: 'bookmarkedPosts',
                 populate: { path: 'user', select: 'username profilePicture' }
             })
-        .lean();
+            .populate('posts')
+            .select('username profilePicture savedTags posts bookmarkedPosts')
+            .lean();
+
+        user.numberOfPosts = user.posts ? user.posts.length : 0;
+        delete user.posts;
+
+        user.profilePictureUrl = user.profilePicture || '/images/default-avatar.jpg';
 
         const posts = user.bookmarkedPosts.map(post => ({
             ...post,
@@ -182,7 +245,7 @@ router.get('/saved', isAuthenticated, async (req, res) => {
         res.render('saved-pages', { 
             title: 'Saved Posts',
             posts, 
-            user: req.user,
+            user: user,
             isLoggedIn: true
         });
     } catch (error) {
@@ -210,14 +273,16 @@ router.get('/profile/:username?', async (req, res) => {
                 ]
             })
             .populate('comments')
-            .populate('friends', 'username profilePicture')  // Add this line to populate friends
+            .populate({
+                path: 'friends',
+                select: 'username profilePicture _id'
+            })
             .lean();
         
         if (!user) {
             return res.status(404).render('error', { title: 'Not Found', message: 'User not found' });
         }
 
-        // Ensure posts, comments, and friends are defined
         user.posts = user.posts || [];
         user.comments = user.comments || [];
         user.friends = user.friends || [];
@@ -231,14 +296,16 @@ router.get('/profile/:username?', async (req, res) => {
             profilePictureUrl: friend.profilePicture || '/images/default-avatar.jpg'
         }));
 
-        const isOwnProfile = req.user && req.user.username === username;
+        const isOwnProfile = req.user && req.user._id.toString() === user._id.toString();
         const isLoggedIn = !!req.user;
+        const isFriend = isLoggedIn && req.user.friends && req.user.friends.some(friend => friend.toString() === user._id.toString());
 
         res.render('profile', { 
             title: isOwnProfile ? 'My Profile' : `${user.username}'s Profile`,
             user: user,
             isOwnProfile: isOwnProfile,
             isLoggedIn: isLoggedIn,
+            isFriend: isFriend,
             layout: 'profile-layout' 
         });
         
@@ -248,10 +315,32 @@ router.get('/profile/:username?', async (req, res) => {
     }
 });
 
-
 // Settings
-router.get('/settings', isAuthenticated, (req, res) => {
-    res.render('settings', { title: 'Settings', user: req.user });
+router.get('/settings', isAuthenticated, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id)
+            .populate('posts')
+            .select('username email country aboutMe profilePicture savedTags posts bookmarkedPosts')
+            .lean();
+
+        user.numberOfPosts = user.posts ? user.posts.length : 0;
+        delete user.posts;
+
+        user.profilePictureUrl = user.profilePicture || '/images/default-avatar.jpg';
+
+        res.render('settings', { 
+            title: 'Settings', 
+            user: user,
+            isLoggedIn: true
+        });
+    } catch (error) {
+        console.error('Error fetching user data for settings:', error);
+        res.status(500).render('error', { 
+            title: 'Server Error', 
+            message: 'Error fetching user data', 
+            user: req.user 
+        });
+    }
 });
 
 // Is user authorized to edit post
@@ -306,7 +395,8 @@ router.post('/edit-post/:id', isAuthenticated, async (req, res) => {
 // Delete post
 router.delete('/delete-post/:id', authMiddleware, async (req, res) => {
     try {
-        const post = await Post.findById(req.params.id).populate('user', 'username _id');
+        const postId = req.params.id;  // Define postId from the route parameter
+        const post = await Post.findById(postId).populate('user', 'username _id');
 
         if (!post) {
             return res.status(404).json({ error: 'Post not found' });
@@ -316,7 +406,17 @@ router.delete('/delete-post/:id', authMiddleware, async (req, res) => {
             return res.status(403).json({ error: 'You are not authorized to delete this post' });
         }
 
-        await Post.findByIdAndDelete(req.params.id);
+        await Post.findByIdAndDelete(postId);
+
+        // Update user's posts array and decrement post count
+        await User.findByIdAndUpdate(
+            req.user._id,
+            {
+                $pull: { posts: postId },    // Remove post ID from user's posts array
+                $inc: { postCount: -1 }      // Decrement post count
+            }
+        );
+
         res.status(200).json({ success: true, message: 'Post deleted successfully' });
     } catch (error) {
         console.error('Error deleting post:', error);
@@ -451,10 +551,16 @@ router.get('/trending', async (req, res) => {
             { path: 'comments' }
         ]);
         
-
+        let user = null;
         if (isLoggedIn && req.user._id) {
+            user = await User.findById(req.user._id)
+                .select('username profilePicture savedTags bookmarkedPosts')
+                .lean();
+
+            user.profilePictureUrl = user.profilePicture || '/images/default-avatar.jpg';
+
             const userId = req.user._id.toString();
-            const userBookmarks = req.user.bookmarkedPosts ? req.user.bookmarkedPosts.map(id => id.toString()) : [];
+            const userBookmarks = user.bookmarkedPosts ? user.bookmarkedPosts.map(id => id.toString()) : [];
             populatedPosts.forEach(post => {
                 post.userVote = (post.upvotes && post.upvotes.some(id => id.toString() === userId)) ? 'upvote' : 
                                 (post.downvotes && post.downvotes.some(id => id.toString() === userId)) ? 'downvote' : null;
@@ -466,13 +572,14 @@ router.get('/trending', async (req, res) => {
             title: 'Trending', 
             posts: populatedPosts,
             isLoggedIn,
-            user: req.user
+            user: user
         });
     } catch (error) {
         console.error('Error fetching trending posts:', error);
         res.status(500).render('pages/error', { title: 'Server Error', message: 'Error fetching trending posts' });
     }
 });
+
 
 // Trending api 
 router.get('/api/trending', async (req, res) => {
@@ -539,66 +646,35 @@ router.post('/profile/update', isAuthenticated, upload.single('profilePicture'),
     }
 });
 
-// Trending route
-router.get('/trending', async (req, res) => {
+// Add friend route
+router.post('/add-friend', authMiddleware, async (req, res) => {
     try {
-        const isLoggedIn = !!req.user;
+        const { friendId } = req.body;
+        const userId = req.user._id;
 
-        const posts = await Post.aggregate([
-            {
-                $addFields: {
-                    upvoteCount: { $size: { $ifNull: ["$upvotes", []] } }
-                }
-            },
-            { $sort: { upvoteCount: -1, createdAt: -1 } }
-        ]).exec();
+        // Check if users are not already friends
+        const user = await User.findById(userId);
+        const friend = await User.findById(friendId);
 
-        const populatedPosts = await Post.populate(posts, [
-            { path: 'user', select: 'username profilePicture' },
-            { path: 'comments' }
-        ]);
-        
-
-        if (isLoggedIn && req.user._id) {
-            const userId = req.user._id.toString();
-            const userBookmarks = req.user.bookmarkedPosts ? req.user.bookmarkedPosts.map(id => id.toString()) : [];
-            populatedPosts.forEach(post => {
-                post.userVote = (post.upvotes && post.upvotes.some(id => id.toString() === userId)) ? 'upvote' : 
-                                (post.downvotes && post.downvotes.some(id => id.toString() === userId)) ? 'downvote' : null;
-                post.isBookmarked = userBookmarks.includes(post._id.toString());
-            });
+        if (!user || !friend) {
+            return res.status(404).json({ message: 'User not found' });
         }
 
-        res.render('pages/trending', { 
-            title: 'Trending', 
-            posts: populatedPosts,
-            isLoggedIn,
-            user: req.user
-        });
+        if (user.friends.includes(friendId) || friend.friends.includes(userId)) {
+            return res.status(400).json({ message: 'Users are already friends' });
+        }
+
+        // Add each user to the other's friends list
+        user.friends.push(friendId);
+        friend.friends.push(userId);
+
+        await user.save();
+        await friend.save();
+
+        res.status(200).json({ message: 'Friend added successfully' });
     } catch (error) {
-        console.error('Error fetching trending posts:', error);
-        res.status(500).render('pages/error', { title: 'Server Error', message: 'Error fetching trending posts' });
-    }
-});
-
-// Trending api 
-router.get('/api/trending', async (req, res) => {
-    try {
-        const page = Math.max(1, parseInt(req.query.page) || 1);
-        const limit = 15;
-        const skip = (page - 1) * limit;
-
-        const posts = await Post.find()
-            .populate('user', 'username profilePicture')
-            .populate('comments')
-            .sort('-upvotes.length') // Sort by number of upvotes in descending order
-            .skip(skip)
-            .limit(limit);
-
-        res.json(posts);
-    } catch (error) {
-        console.error('Error fetching trending posts for API:', error);
-        res.status(500).json({ error: 'Error fetching trending posts' });
+        console.error('Error adding friend:', error);
+        res.status(500).json({ message: 'Server error' });
     }
 });
 
