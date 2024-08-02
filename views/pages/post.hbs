@@ -141,7 +141,7 @@ window.handleImageError = function(img) {
 document.addEventListener('DOMContentLoaded', function() {
     const deleteButton = document.querySelector('.delete-post');
     if (deleteButton) {
-        deleteButton.addEventListener('click', function(e) {    
+        deleteButton.addEventListener('click', function(e) {
             e.preventDefault();
             const postId = this.getAttribute('data-post-id');
             
@@ -185,9 +185,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
-document.addEventListener('DOMContentLoaded', function() {
-    isLoggedIn = document.body.dataset.userLoggedIn === 'true';
-    // Ensure this function is called
-    initializeBookmarking();
-});
 </script>
