@@ -1253,21 +1253,39 @@ nav ul li a .material-icons {
     color: var(--white);
 }
 
+
 .friends-list {
     list-style-type: none;
     padding: 0;
 }
 
 .friends-list li {
-    display: flex;
-    align-items: center;
     margin-bottom: 0.5rem;
 }
 
-.friends-list .avatar.small {
+.friend-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.friend-link:hover {
+    background-color: var(--gray-100);
+}
+
+.friends-list .avatar.tiny {
     width: 30px;
     height: 30px;
     margin-right: 0.5rem;
+}
+
+.friends-list .username {
+    font-weight: normal;
+    color: var(--text-color);
 }
 
 .friends-list .profile-label {
@@ -1275,6 +1293,26 @@ nav ul li a .material-icons {
     font-size: 0.7rem;
     color: var(--primary-color);
 }
+
+.btn-add-friend {
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: none;
+    padding: 0.3rem 1rem;
+    border-radius: 1rem;
+    cursor: pointer;
+    font-weight: 400;
+    display: inline-flex;
+    align-items: center;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+    margin-top: 0.5rem;
+}
+
+.btn-add-friend:hover {
+    background-color: var(--dark-color);
+}
+
 
 .post-header, .comment-header {
     display: flex;

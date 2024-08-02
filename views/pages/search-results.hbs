@@ -7,8 +7,7 @@
             <article class="post" data-post-id="{{this._id}}">
                 <div class="post-header">
                     <div class="post-user">
-                        <img src="{{this.profilePicture}}" alt="{{this.username}}" class="avatar small" onerror="handleImageError(this)">
-                        <span class="username">{{this.user.username}}</span>
+                        <img src="{{this.user.profilePicture}}" alt="{{this.user.username}}" class="avatar small" onerror="this.src='/images/default-avatar.jpg'">                        <span class="username">{{this.user.username}}</span>
                         <span class="time">{{formatDate this.createdAt}}</span>
                     </div>
                 </div>
