@@ -54,41 +54,48 @@ router.get('/', (req, res, next) => {
         if (isLoggedIn && req.user._id) {
             const userId = req.user._id.toString();
             const user = await User.findById(userId).select('bookmarkedPosts').lean();
-            const userBookmarks = user.bookmarkedPosts ? user.bookmarkedPosts.map(id => id.toString()) : [];
             
-            posts.forEach(post => {
-                post.userVote = (post.upvotes && post.upvotes.some(id => id.toString() === userId)) ? 'upvote' : 
-                                (post.downvotes && post.downvotes.some(id => id.toString() === userId)) ? 'downvote' : null;
-                post.isBookmarked = userBookmarks.includes(post._id.toString());
-            });
+            if (user) {
+                const userBookmarks = user.bookmarkedPosts ? user.bookmarkedPosts.map(id => id.toString()) : [];
+                
+                posts.forEach(post => {
+                    post.userVote = (post.upvotes && post.upvotes.some(id => id.toString() === userId)) ? 'upvote' : 
+                                    (post.downvotes && post.downvotes.some(id => id.toString() === userId)) ? 'downvote' : null;
+                    post.isBookmarked = userBookmarks.includes(post._id.toString());
+                });
+            } else {
+                console.log('User not found in database:', userId);
+            }
         }
 
-            let user = null;
-            if (req.user) {
-                user = await User.findById(req.user._id)
-                    .populate('posts')
-                    .select('username profilePicture savedTags posts')
-                    .lean();
-    
+        let user = null;
+        if (req.user) {
+            user = await User.findById(req.user._id)
+                .populate('posts')
+                .select('username profilePicture savedTags posts')
+                .lean();
+
+            if (user) {
                 user.numberOfPosts = user.posts ? user.posts.length : 0;
-                
                 delete user.posts;
-    
                 user.profilePictureUrl = user.profilePicture || '/images/default-avatar.jpg';
+            } else {
+                console.log('User not found in database:', req.user._id);
             }
-    
-            res.render('pages/home', { 
-                title: 'Home', 
-                posts,
-                isLoggedIn,
-                user: user  
-            });
-            console.log('Rendered home page with user:', user);
-        } catch (error) {
-            console.error('Error fetching posts:', error);
-            res.status(500).render('pages/error', { title: 'Server Error', message: 'Error fetching posts' });
         }
-    });
+
+        res.render('pages/home', { 
+            title: 'Home', 
+            posts,
+            isLoggedIn,
+            user: user  
+        });
+        console.log('Rendered home page with user:', user);
+    } catch (error) {
+        console.error('Error fetching posts:', error);
+        res.status(500).render('pages/error', { title: 'Server Error', message: 'Error fetching posts' });
+    }
+});
 
 // Post route
 router.get('/post/:id', async (req, res) => {
