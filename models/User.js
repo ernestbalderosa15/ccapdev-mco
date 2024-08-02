@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
+
 
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
@@ -11,7 +13,7 @@ const userSchema = new mongoose.Schema({
   country: { type: String, default: '' },
   aboutMe: { type: String, default: '' },
   postCount: { type: Number, default: 0 },
-  posts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
+  posts: [{type: mongoose.Schema.Types.ObjectId, ref: 'Post'}],
   comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
   friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   upvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
@@ -43,6 +45,16 @@ userSchema.virtual('numberOfPosts').get(function() {
 
 userSchema.methods.getPostCount = async function() {
   return await mongoose.model('Post').countDocuments({ user: this._id });
+};
+
+userSchema.methods.comparePassword = async function(password) {
+  return await bcrypt.compare(password, this.password);
+};
+
+
+userSchema.statics.hashPassword = async function(password) {
+  const salt = await bcrypt.genSalt(10);
+  return await bcrypt.hash(password, salt);
 };
 
 module.exports = mongoose.model('User', userSchema);

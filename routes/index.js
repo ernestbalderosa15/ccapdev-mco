@@ -10,6 +10,8 @@ const Post = require('../models/Post');
 const Comment = require('../models/Comment');
 const { router: authRouter, authMiddleware } = require('./authRoutes');
 const sanitizeHtml = require('sanitize-html');
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
 
 // Use authentication routes
 router.use('/', authRouter);
@@ -468,6 +470,50 @@ router.get('/api/trending', async (req, res) => {
     } catch (error) {
         console.error('Error fetching trending posts for API:', error);
         res.status(500).json({ error: 'Error fetching trending posts' });
+    }
+});
+
+router.post('/profile/update', isAuthenticated, upload.single('profilePicture'), async (req, res) => {
+    try {
+        const { username, email, country, aboutMe, currentPassword, newPassword, confirmNewPassword, tags } = req.body;
+        const user = await User.findById(req.user._id);
+
+        if (!user) {
+            return res.status(404).render('error', { title: 'Not Found', message: 'User not found', user: req.user });
+        }
+
+        if (currentPassword && newPassword) {
+            const isMatch = await user.comparePassword(currentPassword);
+            if (!isMatch) {
+                return res.status(400).render('settings', { title: 'Settings', user: req.user, error: 'Current password is incorrect' });
+            }
+
+            if (newPassword !== confirmNewPassword) {
+                return res.status(400).render('settings', { title: 'Settings', user: req.user, error: 'New passwords do not match' });
+            }
+
+            user.password = await User.hashPassword(newPassword);
+        }
+
+        if (req.file) {
+            user.profilePicture = req.file.path;
+        }
+        
+        user.username = username || user.username;
+        user.email = email || user.email;
+        user.country = country || user.country;
+        user.aboutMe = aboutMe || user.aboutMe;
+
+        if (tags) {
+            user.savedTags = JSON.parse(tags); // Update savedTags
+        }
+
+        await user.save();
+
+        res.json({ success: true, message: 'Profile updated successfully!' });
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        res.status(500).json({ success: false, message: 'Failed to update profile. Please try again.' });
     }
 });
 
