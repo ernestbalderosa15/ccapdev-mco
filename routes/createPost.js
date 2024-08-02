@@ -6,8 +6,8 @@ const User = require('../models/User');
 
 // Middleware to check if user is authenticated
 const isAuthenticated = (req, res, next) => {
-    if (req.session && req.session.user) {
-        req.user = req.session.user;
+    if (req.user && req.user._id) {  // Check for req.user._id
+        console.log('User authenticated:', req.user);
         next();
     } else {
         res.status(401).json({ error: 'You must be logged in to create a post' });
@@ -44,7 +44,7 @@ router.post('/create-post', isAuthenticated, async (req, res) => {
 
         // Create a new post
         const newPost = new Post({
-            user: req.user.id, // Use the user id from the session
+            user: req.user._id, // Use the user id from the session
             title: title,
             content: sanitizedContent,
             tags: tagArray,
@@ -54,10 +54,14 @@ router.post('/create-post', isAuthenticated, async (req, res) => {
         await newPost.save();
 
         // Update user's posts array and increment post count
-        await User.findByIdAndUpdate(req.user._id, {
-            $push: { posts: newPost._id },
-            $inc: { postCount: 1 }
-        });
+        const updatedUser = await User.findByIdAndUpdate(
+            req.user._id,
+            {
+                $push: { posts: newPost._id },
+                $inc: { postCount: 1 }
+            },
+            { new: true }
+        );
 
 
         res.status(200).json({ success: true, _id: newPost._id });

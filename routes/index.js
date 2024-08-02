@@ -61,18 +61,24 @@ router.get('/', (req, res, next) => {
                 });
             }
 
+        let user = null;
+        if (req.user) {
+            user = await User.findById(req.user._id).select('username profilePicture numberOfPosts savedTags');
+        }
+
         res.render('pages/home', { 
             title: 'Home', 
             posts,
             isLoggedIn,
-            user: req.user
+            user: user  
         });
-        console.log('Rendered home page with user:', req.user);
+        console.log('Rendered home page with user:', user);
     } catch (error) {
         console.error('Error fetching posts:', error);
         res.status(500).render('pages/error', { title: 'Server Error', message: 'Error fetching posts' });
     }
 });
+
 
 // Post route
 router.get('/post/:id', async (req, res) => {
@@ -195,28 +201,44 @@ router.get('/profile/:username?', async (req, res) => {
         }
         
         const user = await User.findOne({ username })
-            .populate('posts')
+            .populate({
+                path: 'posts',
+                options: { sort: { createdAt: -1 } },
+                populate: [
+                    { path: 'user', select: 'username profilePicture' },
+                    { path: 'comments' }
+                ]
+            })
             .populate('comments')
-            .populate('friends')
+            .populate('friends', 'username profilePicture')  // Add this line to populate friends
             .lean();
         
         if (!user) {
             return res.status(404).render('error', { title: 'Not Found', message: 'User not found' });
         }
 
-        // Ensure posts and comments are defined before accessing their properties
+        // Ensure posts, comments, and friends are defined
         user.posts = user.posts || [];
         user.comments = user.comments || [];
+        user.friends = user.friends || [];
 
         user.postCount = user.posts.length;
         user.profilePicture = user.profilePicture || '/images/default-avatar.jpg';
 
+        // Add profilePictureUrl for each friend
+        user.friends = user.friends.map(friend => ({
+            ...friend,
+            profilePictureUrl: friend.profilePicture || '/images/default-avatar.jpg'
+        }));
+
         const isOwnProfile = req.user && req.user.username === username;
+        const isLoggedIn = !!req.user;
 
         res.render('profile', { 
             title: isOwnProfile ? 'My Profile' : `${user.username}'s Profile`,
             user: user,
             isOwnProfile: isOwnProfile,
+            isLoggedIn: isLoggedIn,
             layout: 'profile-layout' 
         });
         
@@ -514,6 +536,69 @@ router.post('/profile/update', isAuthenticated, upload.single('profilePicture'),
     } catch (error) {
         console.error('Error updating profile:', error);
         res.status(500).json({ success: false, message: 'Failed to update profile. Please try again.' });
+    }
+});
+
+// Trending route
+router.get('/trending', async (req, res) => {
+    try {
+        const isLoggedIn = !!req.user;
+
+        const posts = await Post.aggregate([
+            {
+                $addFields: {
+                    upvoteCount: { $size: { $ifNull: ["$upvotes", []] } }
+                }
+            },
+            { $sort: { upvoteCount: -1, createdAt: -1 } }
+        ]).exec();
+
+        const populatedPosts = await Post.populate(posts, [
+            { path: 'user', select: 'username profilePicture' },
+            { path: 'comments' }
+        ]);
+        
+
+        if (isLoggedIn && req.user._id) {
+            const userId = req.user._id.toString();
+            const userBookmarks = req.user.bookmarkedPosts ? req.user.bookmarkedPosts.map(id => id.toString()) : [];
+            populatedPosts.forEach(post => {
+                post.userVote = (post.upvotes && post.upvotes.some(id => id.toString() === userId)) ? 'upvote' : 
+                                (post.downvotes && post.downvotes.some(id => id.toString() === userId)) ? 'downvote' : null;
+                post.isBookmarked = userBookmarks.includes(post._id.toString());
+            });
+        }
+
+        res.render('pages/trending', { 
+            title: 'Trending', 
+            posts: populatedPosts,
+            isLoggedIn,
+            user: req.user
+        });
+    } catch (error) {
+        console.error('Error fetching trending posts:', error);
+        res.status(500).render('pages/error', { title: 'Server Error', message: 'Error fetching trending posts' });
+    }
+});
+
+// Trending api 
+router.get('/api/trending', async (req, res) => {
+    try {
+        const page = Math.max(1, parseInt(req.query.page) || 1);
+        const limit = 15;
+        const skip = (page - 1) * limit;
+
+        const posts = await Post.find()
+            .populate('user', 'username profilePicture')
+            .populate('comments')
+            .sort('-upvotes.length') // Sort by number of upvotes in descending order
+            .skip(skip)
+            .limit(limit);
+
+        res.json(posts);
+    } catch (error) {
+        console.error('Error fetching trending posts for API:', error);
+        res.status(500).json({ error: 'Error fetching trending posts' });
     }
 });
 

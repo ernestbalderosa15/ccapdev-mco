@@ -23,7 +23,7 @@
                     <h2>{{user.username}}</h2>
                     <p>Posts: {{user.numberOfPosts}}</p>
                     {{#unless isOwnProfile}}
-                        <button class="btn-primary">Add Friend</button>
+                        <button class="btn-add-friend" id="addFriendBtn" data-friend-id="{{user._id}}">Add Friend</button>
                     {{/unless}}
                 </div>
 
@@ -43,29 +43,36 @@
                 {{{body}}}
             </section>
 
-            <div class="right-column">
-                <!-- Friends list -->
-                <div class="profile-box">
-                    <h2>Friends</h2>
-                    <ul class="friends-list">
-                        {{#each user.friends}}
-                            <li>
-                                <img src="{{this.profilePicture}}" alt="{{this.username}}" class="avatar small">
-                                <span class="username">{{this.username}}</span>
-                            </li>
-                        {{/each}}
-                    </ul>
-                </div>
+<div class="right-column">
+    <!-- Friends list -->
+    <div class="profile-box">
+        <h2>Friends</h2>
+        <ul class="friends-list">
+            {{#each user.friends}}
+                <li>
+                    <a href="/profile/{{this.username}}" class="friend-link">
+                        <img src="{{this.profilePictureUrl}}" alt="{{this.username}}" class="avatar tiny" onerror="handleImageError(this)">
+                        <span>{{this.username}}</span>
+                    </a>
+                </li>
+            {{else}}
+                <li>No friends yet</li>
+            {{/each}}
+        </ul>
+    </div>
 
-                <!-- Tags list -->
-                <div class="profile-box">
-                    <h2>Tags</h2>
-                    <div class="tags-list">
-                        {{#each user.savedTags}}
-                            <span class="tag">{{this}}</span>
-                        {{/each}}
-                    </div>
-                </div>
+    <!-- Tags list -->
+    <div class="profile-box">
+        <h2>Tags</h2>
+        <div class="tags-list">
+            {{#each user.savedTags}}
+                <a href="/search?tag={{this}}" class="tag">{{this}}</a>
+            {{else}}
+                <span>No tags saved</span>
+            {{/each}}
+        </div>
+    </div>
+</div>
             </div>
         </div>
     </main>

@@ -5,7 +5,7 @@
     <p>{{user.aboutMe}}</p>
 </div>
 
-<div id="posts" style="display: none;">
+<div id="posts" style="display: none;"><div id="posts">
     {{#each user.posts}}
         <div class="post profile-box" data-id="{{this.id}}">
             <div class="post-header">
@@ -15,35 +15,47 @@
                 </div>
                 <span class="post-time">{{this.time}}</span>
             </div>
-            <h3 class="post-title">{{this.title}}</h3>
-            <img src="https://via.placeholder.com/400x200" alt="Post image" class="post-image">
+            <h2 class="post-title"><a href="/post/{{this._id}}">{{this.title}}</a></h2>
+            <div class="post-content-preview">
+                {{{truncateHtml this.content 150}}}
+            </div>
+            {{#if this.image}}
+                <img src="{{this.image}}" alt="Post image" class="post-image">
+            {{/if}}
+            <div class="post-tags">
+                {{#each this.tags}}
+                    <a href="/search?tag={{this}}" class="tag">{{this}}</a>
+                {{/each}}
+            </div>
             <div class="post-stats">
                 <div class="post-stats-left">
-                    <button class="btn-icon">
-                        <span class="material-icons">arrow_upward</span>
-                        <span>{{this.upvotes}}</span>
+                    <button class="btn-icon upvote-btn {{#if (eq this.userVote 'upvote')}}active{{/if}}" data-post-id="{{this._id}}">
+                        <span class="material-icons">arrow_upward</span> 
+                        <span class="upvote-count">{{this.upvotes.length}}</span>
                     </button>
-                    <button class="btn-icon">
+                    <button class="btn-icon downvote-btn {{#if (eq this.userVote 'downvote')}}active{{/if}}" data-post-id="{{this._id}}">
                         <span class="material-icons">arrow_downward</span>
-                        <span>{{this.downvotes}}</span>
                     </button>
                     <button class="btn-icon">
-                        <span class="material-icons">comment</span>
-                        <span>{{this.comments.length}}</span>
+                        <span class="material-icons">comment</span> 
+                        {{this.comments.length}}
                     </button>
                 </div>
                 <div class="post-stats-right">
-                    <button class="btn-icon">
-                        <span class="material-icons">bookmark</span>
+                    <button class="btn-icon bookmark-btn {{#if this.isBookmarked}}active{{/if}}" data-post-id="{{this._id}}">
+                        <span class="material-icons">{{#if this.isBookmarked}}bookmark{{else}}bookmark_border{{/if}}</span>
                     </button>
-                    <button class="btn-icon">
+                    <button class="btn-icon share-btn" data-post-id="{{this._id}}">
                         <span class="material-icons">share</span>
                     </button>
                 </div>
             </div>
         </div>
+    {{else}}
+        <p>No posts yet.</p>
     {{/each}}
 </div>
+
 
 <div id="comments" style="display: none;">
     {{#each user.comments}}
@@ -66,46 +78,74 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const navLinks = document.querySelectorAll('.left-column nav a');
-        const sections = document.querySelectorAll('.middle-column > div');
+document.addEventListener('DOMContentLoaded', function() {
+    // Navigation functionality
+    const navLinks = document.querySelectorAll('.left-column nav a');
+    const sections = document.querySelectorAll('.middle-column > div');
 
-        navLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                const targetId = this.getAttribute('href').substring(1);
-                sections.forEach(section => {
-                    section.style.display = section.id === targetId ? 'block' : 'none';
-                });
-                // Remove 'active' class from all links and add to the clicked one
-                navLinks.forEach(l => l.classList.remove('active'));
-                this.classList.add('active');
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href').substring(1);
+            sections.forEach(section => {
+                section.style.display = section.id === targetId ? 'block' : 'none';
             });
-        });
-
-        // Add click event to posts to redirect to post page
-        const posts = document.querySelectorAll('.post');
-        posts.forEach(post => {
-            post.addEventListener('click', function(e) {
-                // Prevent redirection if clicking on a button
-                if (e.target.closest('.btn-icon')) {
-                    e.stopPropagation();
-                    return;
-                }
-                // Redirect to post page
-                const postId = this.getAttribute('data-id');
-                window.location.href = `/post/${postId}`;
-            });
-        });
-
-        // Add click event to "View Post" buttons on comments
-        const viewPostButtons = document.querySelectorAll('.btn-view-post');
-        viewPostButtons.forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.stopPropagation();
-                const postId = this.closest('.comment').getAttribute('data-post-id');
-                window.location.href = `/post/${postId}`;
-            });
+            // Remove 'active' class from all links and add to the clicked one
+            navLinks.forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
         });
     });
+
+    // Make only the post title clickable
+    const postTitles = document.querySelectorAll('.post-title a');
+    postTitles.forEach(title => {
+        title.addEventListener('click', function(e) {
+            e.stopPropagation(); // Prevent event from bubbling up to the post
+        });
+    });
+
+    // Add click event to "View Post" buttons on comments
+    const viewPostButtons = document.querySelectorAll('.btn-view-post');
+    viewPostButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const postId = this.closest('.comment').getAttribute('data-post-id');
+            window.location.href = `/post/${postId}`;
+        });
+    });
+
+    // Add Friend button functionality
+    const addFriendBtn = document.getElementById('addFriendBtn');
+    if (addFriendBtn) {
+        addFriendBtn.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            fetch('/add-friend', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Friend request sent!');
+                    this.textContent = 'Friend Request Sent';
+                    this.disabled = true;
+                } else {
+                    alert('Failed to send friend request.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred.');
+            });
+        });
+    }
+
+    // Initialize post functionalities
+    initializeVoting();
+    initializeBookmarking();
+    initializeTagClickHandlers();
+});
 </script>
