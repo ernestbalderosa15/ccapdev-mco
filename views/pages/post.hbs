@@ -69,62 +69,7 @@
 
         <div class="comments-list">
             {{#each post.comments}}
-            <div class="comment">
-                <div class="comment-header">
-                    <div class="comment-user-info">
-                        <img src="{{this.user.profilePictureUrl}}" alt="{{this.user.username}}" class="avatar small">
-                        <span class="username">{{this.user.username}}</span>
-                        <span class="time">{{formatDate this.createdAt}}</span>
-                    </div>
-                    <div class="comment-actions">
-                        <button class="comment-menu"><span class="material-icons">more_vert</span></button>
-                        <div class="comment-menu-content">
-                                    {{#if (eq ../../user._id this.user._id)}}
-                                        <a href="#" class="edit-comment" data-comment-id="{{this._id}}">Edit</a>
-                                        <a href="#" class="delete-comment" data-comment-id="{{this._id}}">Delete</a>
-                                    {{/if}}
-                            <a href="#" class="bookmark-comment" data-comment-id="{{this._id}}">Bookmark</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="comment-content">
-                    {{{this.content}}}
-                </div>
-                <button class="btn-reply" data-comment-id="{{this._id}}">
-                    <span class="material-icons">reply</span>
-                    Reply
-                </button>
-                {{#if this.replies}}
-                <div class="nested-comments">
-                    {{#each this.replies}}
-                    <div class="comment nested">
-                        <div class="comment-header">
-                            <div class="comment-user-info">
-                                <img src="{{this.user.avatar}}" alt="{{this.user.username}}" class="avatar small">
-                                <span class="username">{{this.user.username}}</span>
-                                <span class="time">{{formatDate this.createdAt}}</span>
-                            </div>
-                            <div class="comment-actions">
-                                <button class="comment-menu"><span class="material-icons">more_vert</span></button>
-                                <div class="comment-menu-content">
-                                    <a href="#" class="edit-comment" data-comment-id="{{this._id}}">Edit</a>
-                                    <a href="#" class="share-comment" data-comment-id="{{this._id}}">Share</a>
-                                    <a href="#" class="bookmark-comment" data-comment-id="{{this._id}}">Bookmark</a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="comment-content">
-                            {{{this.content}}}
-                        </div>
-                        <button class="btn-reply" data-comment-id="{{this._id}}">
-                            <span class="material-icons">reply</span>
-                            Reply
-                        </button>
-                    </div>
-                    {{/each}}
-                </div>
-                {{/if}}
-            </div>
+                {{> commentbody}}
             {{/each}}
         </div>
     </div>
