@@ -108,10 +108,6 @@ function initializeCreatePostPage() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    initializeComments();
-});
-
 function initializeComments() {
     const commentsList = document.querySelector('.comments-list');
 
@@ -182,140 +178,161 @@ function initializeComments() {
             commentInput.value = '';
         }
     });
-/*
-    function addComment(text, parentComment = null) {
-        const newComment = document.createElement('div');
-        newComment.className = 'comment' + (parentComment ? ' nested' : '');
-        newComment.innerHTML = `
+
+    function addComment(text, parentCommentId = null) {
+        console.log('addComment function called with:', { text, parentCommentId });
+        
+        const postId = document.querySelector('.post').dataset.postId;
+        if (!postId) {
+            console.error('Post ID not found in DOM');
+            alert('Error: Post ID not found. Please refresh the page and try again.');
+            return;
+        }
+        
+        console.log('Sending request to server with data:', { postId, text, parentCommentId });
+        
+        fetch('/comment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+            },
+            body: JSON.stringify({
+                postId: postId,
+                content: text,
+                parentCommentId: parentCommentId
+            }),
+        })
+        .then(response => {
+            console.log('Received response from server:', response);
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(`Server responded with ${response.status}: ${text}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Parsed response data:', data);
+            if (data.success) {
+                console.log('Comment added successfully, creating HTML');
+                const newCommentHtml = createCommentHtml(data.comment);
+                if (parentCommentId) {
+                    const parentComment = document.querySelector(`[data-comment-id="${parentCommentId}"]`);
+                    if (!parentComment) {
+                        console.error(`Parent comment with ID ${parentCommentId} not found in DOM`);
+                        throw new Error('Parent comment not found');
+                    }
+                    let nestedComments = parentComment.querySelector('.nested-comments');
+                    if (!nestedComments) {
+                        console.log('Creating new nested-comments container');
+                        nestedComments = document.createElement('div');
+                        nestedComments.className = 'nested-comments';
+                        parentComment.appendChild(nestedComments);
+                    }
+                    nestedComments.insertAdjacentHTML('afterbegin', newCommentHtml);
+                } else {
+                    const commentsList = document.querySelector('.comments-list');
+                    if (!commentsList) {
+                        console.error('Comments list not found in DOM');
+                        throw new Error('Comments list not found');
+                    }
+                    commentsList.insertAdjacentHTML('afterbegin', newCommentHtml);
+                }
+                console.log('New comment added to DOM');
+                document.querySelector('.comment-input').value = '';
+            } else {
+                throw new Error(data.error || 'Failed to add comment');
+            }
+        })
+        .catch(error => {
+            console.error('Error in addComment:', error);
+            alert('An error occurred while adding the comment: ' + error.message);
+        });
+    }
+        
+        function createCommentHtml(comment) {
+    console.log('Creating HTML for comment:', comment);
+    return `
+        <div class="comment" data-comment-id="${comment._id}">
             <div class="comment-header">
                 <div class="comment-user-info">
-                    <img src="https://via.placeholder.com/30" alt="Current User" class="avatar small">
-                    <span class="username">Current User</span>
+                    <img src="${comment.user.profilePicture || '/images/default-avatar.jpg'}" alt="${comment.user.username}" class="avatar small">
+                    <span class="username">${comment.user.username}</span>
                     <span class="time">Just now</span>
                 </div>
                 <div class="comment-actions">
                     <button class="comment-menu"><span class="material-icons">more_vert</span></button>
                     <div class="comment-menu-content">
                         <a href="#" class="edit-comment">Edit</a>
-                        <a href="#" class="share-comment">Share</a>
-                        <a href="#" class="bookmark-comment">Bookmark</a>
+                        <a href="#" class="delete-comment">Delete</a>
                     </div>
                 </div>
             </div>
-            <div class="comment-content">${text}</div>
-            <button class="btn-reply">
+            <div class="comment-content">${comment.content}</div>
+            <button class="btn-reply" data-comment-id="${comment._id}">
                 <span class="material-icons">reply</span>
                 Reply
             </button>
-        `;
-        
-        if (parentComment) {
-            let nestedComments = parentComment.querySelector('.nested-comments');
-            if (!nestedComments) {
-                nestedComments = document.createElement('div');
-                nestedComments.className = 'nested-comments';
-                parentComment.appendChild(nestedComments);
-            }
-            nestedComments.appendChild(newComment);
-        } else {
-            commentsList.insertBefore(newComment, commentsList.firstChild);
-        }
-    }
-*/
-
-async function addComment(text, parentComment = null) {
-    try {
-        console.log('Failed to add comment');
-        const response = await fetch('/comments', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                postId: postId,
-                content: text,
-                parentId: parentComment ? parentComment.getAttribute('data-comment-id') : null
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to add comment');
-        }
-
-        const newCommentData = await response.json();
-        const newCommentElement = createCommentElement(newCommentData);
-
-        if (parentComment) {
-            let nestedComments = parentComment.querySelector('.nested-comments');
-            if (!nestedComments) {
-                nestedComments = document.createElement('div');
-                nestedComments.className = 'nested-comments';
-                parentComment.appendChild(nestedComments);
-            }
-            nestedComments.appendChild(newCommentElement);
-        } else {
-            commentsList.insertBefore(newCommentElement, commentsList.firstChild);
-        }
-    } catch (error) {
-        console.error('Error adding comment:', error);
-        alert('Failed to add comment. Please try again.');
-    }
-    console.log('brruh');
-}
-
-function createCommentElement(commentData) {
-    const newComment = document.createElement('div');
-    newComment.className = 'comment' + (commentData.parent ? ' nested' : '');
-    newComment.setAttribute('data-comment-id', commentData._id);
-    newComment.innerHTML = `
-        <div class="comment-header">
-            <div class="comment-user-info">
-                <img src="${commentData.user.profilePictureUrl || 'https://via.placeholder.com/30'}" alt="${commentData.user.username}" class="avatar small">
-                <span class="username">${commentData.user.username}</span>
-                <span class="time">Just now</span>
-            </div>
-            <div class="comment-actions">
-                <button class="comment-menu"><span class="material-icons">more_vert</span></button>
-                <div class="comment-menu-content">
-                    <a href="#" class="edit-comment">Edit</a>
-                    <a href="#" class="delete-comment">Delete</a>
-                    <a href="#" class="bookmark-comment">Bookmark</a>
-                </div>
-            </div>
+            <div class="nested-comments"></div>
         </div>
-        <div class="comment-content">${commentData.content}</div>
-        <button class="btn-reply">
-            <span class="material-icons">reply</span>
-            Reply
-        </button>
     `;
 }
-    function createReplyForm() {
-        const form = document.createElement('div');
-        form.className = 'reply-form';
-        form.innerHTML = `
-            <textarea placeholder="Write a reply..." class="comment-input"></textarea>
-            <button type="submit" class="btn-icon btn-add-comment"><span class="material-icons">send</span></button>
-        `;
-
-        const textarea = form.querySelector('textarea');
-        const submitButton = form.querySelector('button');
-
-        submitButton.addEventListener('click', function() {
-            const replyText = textarea.value.trim();
-            if (replyText) {
-                const parentComment = form.closest('.comment');
-                addComment(replyText, parentComment);
-                form.remove();
+        
+        // Add this to your initialization code
+        document.addEventListener('DOMContentLoaded', function() {
+            const addCommentBtn = document.querySelector('.btn-add-comment');
+            const commentInput = document.querySelector('.comment-input');
+        
+            if (addCommentBtn && commentInput) {
+                console.log('Comment button and input found');
+                addCommentBtn.addEventListener('click', function() {
+                    console.log('Add comment button clicked');
+                    const commentText = commentInput.value.trim();
+                    if (commentText) {
+                        addComment(commentText);
+                    } else {
+                        console.log('Comment text is empty');
+                    }
+                });
+            } else {
+                console.error('Comment button or input not found in DOM');
             }
+
+            // Add event delegation for reply buttons
+        document.body.addEventListener('click', function(event) {
+        if (event.target.classList.contains('btn-reply') || event.target.closest('.btn-reply')) {
+            const replyButton = event.target.classList.contains('btn-reply') ? event.target : event.target.closest('.btn-reply');
+            const parentCommentId = replyButton.dataset.commentId;
+            const replyForm = createReplyForm(parentCommentId);
+            const parentComment = replyButton.closest('.comment');
+            parentComment.appendChild(replyForm);
+        }
+    });
         });
 
-        return form;
-    }
+        function createReplyForm(parentCommentId) {
+            const form = document.createElement('div');
+            form.className = 'reply-form';
+            form.innerHTML = `
+                <textarea placeholder="Write a reply..." class="comment-input"></textarea>
+                <button type="submit" class="btn-icon btn-add-comment"><span class="material-icons">send</span></button>
+            `;
+        
+            const textarea = form.querySelector('textarea');
+            const submitButton = form.querySelector('button');
+        
+            submitButton.addEventListener('click', function() {
+                const replyText = textarea.value.trim();
+                if (replyText) {
+                    addComment(replyText, parentCommentId);
+                    form.remove();
+                }
+            });
+        
+            return form;
+        }
 }
-
-
-    
 
 function initializeNavigation() {
     const sidebarLinks = document.querySelectorAll('.left-column nav ul li a');
