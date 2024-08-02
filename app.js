@@ -153,6 +153,7 @@ const indexRoutes = require('./routes/index');
 const { router: authRoutes, authMiddleware } = require('./routes/authRoutes');
 const createPostRouter = require('./routes/createPost');
 const searchRoutes = require('./routes/searchRoutes');
+const commentRoutes = require('./routes/comments');
 
 // Configure multer for handling file uploads
 const storage = multer.diskStorage({
@@ -174,6 +175,7 @@ app.use('/', indexRoutes);
 app.use('/', authRoutes);
 app.use('/', createPostRouter);
 app.use('/', searchRoutes);
+app.use('/', commentRoutes);
 
 // Image upload route
 app.post('/upload-image', upload.single('upload'), (req, res) => {
