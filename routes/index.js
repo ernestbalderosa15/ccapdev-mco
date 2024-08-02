@@ -54,7 +54,7 @@ router.get('/', (req, res, next) => {
             const userBookmarks = req.user.bookmarkedPosts ? req.user.bookmarkedPosts.map(id => id.toString()) : [];
             posts.forEach(post => {
                 post.userVote = (post.upvotes && post.upvotes.some(id => id.toString() === userId)) ? 'upvote' : 
-                                (post.downvotes && post.downvotes.some(id => id.toString() === userId)) ? 'downvote' : null;
+                (post.downvotes && post.downvotes.some(id => id.toString() === userId)) ? 'downvote' : null;
                 post.isBookmarked = userBookmarks.includes(post._id.toString());
             });
         }
@@ -277,8 +277,67 @@ router.post('/update-post/:id', isAuthenticated, async (req, res) => {
     }
 });
 
-// Update user profile route
-// Update user profile route
+router.post('/post/:id/:voteType', isAuthenticated, async (req, res) => {
+    try {
+        const post = await Post.findById(req.params.id);
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        const userId = req.user._id;
+        const voteType = req.params.voteType;
+
+        if (voteType === 'upvote') {
+            post.upvotes.addToSet(userId);
+            post.downvotes.pull(userId);
+        } else if (voteType === 'downvote') {
+            post.downvotes.addToSet(userId);
+            post.upvotes.pull(userId);
+        } else {
+            return res.status(400).json({ error: 'Invalid vote type' });
+        }
+
+        await post.save();
+
+        res.json({
+            upvotes: post.upvotes.length,
+            downvotes: post.downvotes.length,
+            userVote: voteType
+        });
+    } catch (error) {
+        console.error('Error handling vote:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+router.post('/post/:id/bookmark', isAuthenticated, async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const userId = req.user._id;
+
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        if (req.user.bookmarkedPosts.includes(postId)) {
+            // If post is already bookmarked, remove it
+            req.user.bookmarkedPosts.pull(postId);
+        } else {
+            // If post is not bookmarked, add it
+            req.user.bookmarkedPosts.push(postId);
+        }
+
+        await req.user.save();
+
+        const isBookmarked = req.user.bookmarkedPosts.includes(postId);
+        res.json({ isBookmarked });
+    } catch (error) {
+        console.error('Error bookmarking post:', error);
+        res.status(500).json({ error: 'Failed to bookmark post' });
+    }
+});
+
 router.post('/profile/update', isAuthenticated, upload.single('profilePicture'), async (req, res) => {
     try {
         const { username, email, country, aboutMe, currentPassword, newPassword, confirmNewPassword, tags } = req.body;

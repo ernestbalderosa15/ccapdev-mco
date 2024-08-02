@@ -48,9 +48,10 @@
         </button>
     </div>
     <div class="post-stats-right">
-        <button class="btn-icon bookmark-btn {{#if post.isBookmarked}}active{{/if}}" data-post-id="{{post._id}}">
-            <span class="material-icons">{{#if post.isBookmarked}}bookmark{{else}}bookmark_border{{/if}}</span>
-        </button>
+        <button class="bookmark-btn" data-post-id="{{post._id}}">
+    <span class="material-icons">{{#if post.isBookmarked}}bookmark{{else}}bookmark_border{{/if}}</span>
+</button>
+
         <button class="btn-icon share-btn" data-post-id="{{post._id}}">
             <span class="material-icons">share</span>
         </button>
@@ -140,7 +141,7 @@ window.handleImageError = function(img) {
 document.addEventListener('DOMContentLoaded', function() {
     const deleteButton = document.querySelector('.delete-post');
     if (deleteButton) {
-        deleteButton.addEventListener('click', function(e) {
+        deleteButton.addEventListener('click', function(e) {    
             e.preventDefault();
             const postId = this.getAttribute('data-post-id');
             
@@ -181,5 +182,12 @@ document.addEventListener('DOMContentLoaded', function() {
             this.style.display = 'none';
         };
     }
+});
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    isLoggedIn = document.body.dataset.userLoggedIn === 'true';
+    // Ensure this function is called
+    initializeBookmarking();
 });
 </script>
