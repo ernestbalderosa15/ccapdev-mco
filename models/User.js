@@ -40,7 +40,7 @@ userSchema.pre('save', function(next) {
 });
 
 userSchema.virtual('numberOfPosts').get(function() {
-  return this.posts ? this.posts.length : 0;
+  return this.postCount;
 });
 
 userSchema.methods.getPostCount = async function() {
