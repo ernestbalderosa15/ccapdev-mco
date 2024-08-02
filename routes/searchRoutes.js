@@ -37,7 +37,7 @@ router.get('/search', async (req, res) => {
             const userId = req.user._id.toString();
             const userBookmarks = req.user.bookmarkedPosts || [];
             results.forEach(post => {
-                post.userVote = post.upvotes && post.upvotes.includes(userId) ? 'upvote' : 
+                post.userVote = post.upvote && post.upvote.includes(userId) ? 'upvote' : 
                                 post.downvotes && post.downvotes.includes(userId) ? 'downvote' : null;
                 post.isBookmarked = userBookmarks.some(id => id.toString() === post._id.toString());
             });
