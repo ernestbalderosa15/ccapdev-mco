@@ -19,7 +19,7 @@ const app = express();
 
 // Environment variables
 const dbName = process.env.DB_NAME || 'Forum';
-const mongoURI = "mongodb+srv://ernestbalderosa:pAuGvXMwMsmYkQeL@cluster0.hhgoid5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const mongoURI = process.env.MONGODB_URI || `mongodb://localhost:27017/${dbName}`;
 const sessionSecret = process.env.SESSION_SECRET || 'ccapdev-secret-key';
 const PORT = process.env.PORT || 3000;
 
@@ -153,6 +153,7 @@ const indexRoutes = require('./routes/index');
 const { router: authRoutes, authMiddleware } = require('./routes/authRoutes');
 const createPostRouter = require('./routes/createPost');
 const searchRoutes = require('./routes/searchRoutes');
+const commentRoutes = require('./routes/comments');
 
 // Configure multer for handling file uploads
 const storage = multer.diskStorage({
@@ -174,6 +175,7 @@ app.use('/', indexRoutes);
 app.use('/', authRoutes);
 app.use('/', createPostRouter);
 app.use('/', searchRoutes);
+app.use('/', commentRoutes);
 
 // Image upload route
 app.post('/upload-image', upload.single('upload'), (req, res) => {

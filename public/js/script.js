@@ -108,6 +108,10 @@ function initializeCreatePostPage() {
     });
 }
 
+document.addEventListener('DOMContentLoaded', function() {
+    initializeComments();
+});
+
 function initializeComments() {
     const commentsList = document.querySelector('.comments-list');
 
@@ -178,7 +182,7 @@ function initializeComments() {
             commentInput.value = '';
         }
     });
-
+/*
     function addComment(text, parentComment = null) {
         const newComment = document.createElement('div');
         newComment.className = 'comment' + (parentComment ? ' nested' : '');
@@ -217,7 +221,75 @@ function initializeComments() {
             commentsList.insertBefore(newComment, commentsList.firstChild);
         }
     }
+*/
 
+async function addComment(text, parentComment = null) {
+    try {
+        console.log('Failed to add comment');
+        const response = await fetch('/comments', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                postId: postId,
+                content: text,
+                parentId: parentComment ? parentComment.getAttribute('data-comment-id') : null
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to add comment');
+        }
+
+        const newCommentData = await response.json();
+        const newCommentElement = createCommentElement(newCommentData);
+
+        if (parentComment) {
+            let nestedComments = parentComment.querySelector('.nested-comments');
+            if (!nestedComments) {
+                nestedComments = document.createElement('div');
+                nestedComments.className = 'nested-comments';
+                parentComment.appendChild(nestedComments);
+            }
+            nestedComments.appendChild(newCommentElement);
+        } else {
+            commentsList.insertBefore(newCommentElement, commentsList.firstChild);
+        }
+    } catch (error) {
+        console.error('Error adding comment:', error);
+        alert('Failed to add comment. Please try again.');
+    }
+    console.log('brruh');
+}
+
+function createCommentElement(commentData) {
+    const newComment = document.createElement('div');
+    newComment.className = 'comment' + (commentData.parent ? ' nested' : '');
+    newComment.setAttribute('data-comment-id', commentData._id);
+    newComment.innerHTML = `
+        <div class="comment-header">
+            <div class="comment-user-info">
+                <img src="${commentData.user.profilePictureUrl || 'https://via.placeholder.com/30'}" alt="${commentData.user.username}" class="avatar small">
+                <span class="username">${commentData.user.username}</span>
+                <span class="time">Just now</span>
+            </div>
+            <div class="comment-actions">
+                <button class="comment-menu"><span class="material-icons">more_vert</span></button>
+                <div class="comment-menu-content">
+                    <a href="#" class="edit-comment">Edit</a>
+                    <a href="#" class="delete-comment">Delete</a>
+                    <a href="#" class="bookmark-comment">Bookmark</a>
+                </div>
+            </div>
+        </div>
+        <div class="comment-content">${commentData.content}</div>
+        <button class="btn-reply">
+            <span class="material-icons">reply</span>
+            Reply
+        </button>
+    `;
+}
     function createReplyForm() {
         const form = document.createElement('div');
         form.className = 'reply-form';
@@ -241,6 +313,9 @@ function initializeComments() {
         return form;
     }
 }
+
+
+    
 
 function initializeNavigation() {
     const sidebarLinks = document.querySelectorAll('.left-column nav ul li a');
