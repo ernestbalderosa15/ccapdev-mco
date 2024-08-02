@@ -17,9 +17,11 @@ const multer = require('multer');
 
 const app = express();
 
+app.use('/uploads', express.static('uploads'));
+
 // Environment variables
 const dbName = process.env.DB_NAME || 'Forum';
-const mongoURI = "mongodb+srv://ernestbalderosa:pAuGvXMwMsmYkQeL@cluster0.hhgoid5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const mongoURI = process.env.MONGODB_URI;
 const sessionSecret = process.env.SESSION_SECRET || 'ccapdev-secret-key';
 const PORT = process.env.PORT || 3000;
 
@@ -143,7 +145,7 @@ app.use((req, res, next) => {
 
 app.use((req, res, next) => {
     if (req.user) {
-      req.user.profilePictureUrl = req.user.profilePicture || '/images/default-avatar.jpg';
+      req.user.profilePictureUrl = req.user.profilePicture;
     }
     next();
   });

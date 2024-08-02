@@ -1,20 +1,17 @@
-{{!-- partials/home.hbs --}}
-
 <header>
     <div class="container">
         <div class="logo">
             <a href="/">The Forum</a>
         </div>
-<div class="search-bar">
-    <form id="search-form" action="/search" method="GET">
-        <input type="text" name="q" placeholder="Search..." id="search-input">
-        <button type="submit" class="search-button">
-            <span class="material-icons search-icon">search</span>
-        </button>
-    </form>
-</div>
+        <div class="search-bar">
+            <form id="search-form" action="/search" method="GET">
+                <input type="text" name="q" placeholder="Search..." id="search-input">
+                <button type="submit" class="search-button">
+                    <span class="material-icons search-icon">search</span>
+                </button>
+            </form>
+        </div>
         <div class="user-actions">
-            
             {{#if user}} 
                 <a href="/create-post" class="btn-create-post">
                     <span class="material-icons">add</span> Create Post
@@ -22,10 +19,12 @@
                 <a href="#" class="icon-link"><span class="material-icons">mail</span></a>
                 <a href="#" class="icon-link"><span class="material-icons">notifications</span></a>
                 <div class="profile-dropdown">
-<img src="{{user.profilePicture}}" alt="{{user.username}}" class="avatar" onerror="this.src='/images/default-avatar.jpg'; console.error('Failed to load profile picture:', this.src);">                    <div style="display:none;">
-  <p>Header User Debug:</p>
-  <pre>{{json user}}</pre>
-</div>
+                    <img src="{{user.profilePicture}}" alt="{{user.username}}" class="avatar" onerror="this.src='/images/default-avatar.jpg'; console.error('Failed to load profile picture:', this.src);">
+
+                    <div style="display:none;">
+                        <p>Header User Debug:</p>
+                        <pre>{{json user}}</pre>
+                    </div>
                     <span class="material-icons">arrow_drop_down</span>
                     <div class="profile-dropdown-content">
                         <a href="/profile">View Profile</a>

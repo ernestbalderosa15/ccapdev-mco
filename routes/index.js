@@ -248,7 +248,6 @@ router.get('/profile/:username?', async (req, res) => {
     }
 });
 
-
 // Settings
 router.get('/settings', isAuthenticated, (req, res) => {
     res.render('settings', { title: 'Settings', user: req.user });
